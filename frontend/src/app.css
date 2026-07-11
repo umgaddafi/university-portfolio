@@ -8320,11 +8320,14 @@
     }
 
     .directory-hero-stats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        display: flex;
+        justify-content: center;
         gap: 0.4rem;
     }
 
     .directory-hero-stat-card {
+        flex: 1;
+        max-width: 90px;
         padding: 0.5rem 0.2rem;
         border-radius: 1rem;
     }
