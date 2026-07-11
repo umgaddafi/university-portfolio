@@ -146,11 +146,12 @@ class LegacyPortfolioService
     {
         $query = DB::table('staff as s')
             ->leftJoin('ranks as r', 's.rank_id', '=', 'r.id')
+            ->leftJoin('staff_categories as sc', 'r.staff_category_id', '=', 'sc.id')
             ->join('department as d', 's.department_id', '=', 'd.department_id')
             ->join('college as c', 'd.college_id', '=', 'c.college_id')
             ->selectRaw(
                 "s.staff_id, CONCAT(COALESCE(s.title, ''), ' ', s.first_name, ' ', s.last_name) as name,
-                COALESCE(r.name, 'Unassigned') as role, COALESCE(r.id, 9999) as rank_level_value,
+                COALESCE(r.name, 'Unassigned') as role, COALESCE(sc.name, 'Uncategorized') as category, COALESCE(r.id, 9999) as rank_level_value,
                 d.name as department, c.name as faculty, IFNULL(s.profile_photo, '') as profile_photo"
             )
             ->where('s.is_active', 1);
@@ -184,6 +185,7 @@ class LegacyPortfolioService
                 'staffId' => (int) $item->staff_id,
                 'name' => trim((string) $item->name),
                 'role' => (string) $item->role,
+                'category' => (string) $item->category,
                 'department' => (string) $item->department,
                 'faculty' => (string) $item->faculty,
                 'profilePhotoUrl' => $this->fileUrl('uploads/' . ltrim((string) $item->profile_photo, '/')),
@@ -197,6 +199,7 @@ class LegacyPortfolioService
                 'faculties' => DB::table('college')->orderBy('name')->pluck('name')->all(),
                 'departments' => DB::table('department')->orderBy('name')->pluck('name')->all(),
                 'ranks' => DB::table('ranks')->orderBy('id')->pluck('name')->all(),
+                'categories' => DB::table('staff_categories')->orderBy('id')->pluck('name')->all(),
             ],
         ];
     }

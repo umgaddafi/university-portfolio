@@ -10,8 +10,8 @@ import { api } from '../../lib/api';
 import { getErrorMessage } from '../../utils/formatters';
 
 function PublicDirectoryPage({ user }) {
-    const [directory, setDirectory] = useState({ items: [], filters: { faculties: [], departments: [], ranks: [] } });
-    const [filters, setFilters] = useState({ search: '', faculty: '', department: '', rank: '' });
+    const [directory, setDirectory] = useState({ items: [], filters: { faculties: [], departments: [], ranks: [], categories: [] } });
+    const [filters, setFilters] = useState({ search: '', category: '', faculty: '', department: '', rank: '' });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [retryKey, setRetryKey] = useState(0);
@@ -61,8 +61,9 @@ function PublicDirectoryPage({ user }) {
             const matchesFaculty = filters.faculty === '' || item.faculty === filters.faculty;
             const matchesDepartment = filters.department === '' || item.department === filters.department;
             const matchesRank = filters.rank === '' || item.role === filters.rank;
+            const matchesCategory = filters.category === '' || item.category === filters.category;
 
-            return matchesSearch && matchesFaculty && matchesDepartment && matchesRank;
+            return matchesSearch && matchesFaculty && matchesDepartment && matchesRank && matchesCategory;
         });
 
     return (
@@ -152,6 +153,20 @@ function PublicDirectoryPage({ user }) {
                                     {availableDepartments.map((department) => (
                                         <option key={department} value={department}>
                                             {department}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="field directory-filter-category">
+                                <select
+                                    className="select"
+                                    value={filters.category}
+                                    onChange={(event) => setFilters((current) => ({ ...current, category: event.target.value }))}
+                                >
+                                    <option value="">Category...</option>
+                                    {(directory.filters.categories || []).map((category) => (
+                                        <option key={category} value={category}>
+                                            {category}
                                         </option>
                                     ))}
                                 </select>
