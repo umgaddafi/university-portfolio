@@ -697,7 +697,6 @@
     }
 
     .landing-footer-action {
-        display: none;
         color: rgb(var(--accent-deep-rgb));
         font-size: 0.9rem;
         font-weight: 600;
