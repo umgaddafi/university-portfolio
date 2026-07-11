@@ -788,7 +788,7 @@ export function AdminPayslipSection() {
         if (file) {
             alert(`Dummy upload initiated for: ${file.name}`);
         } else {
-            alert('Please select an .xlsm file first.');
+            alert('Please select an .xlsx file first.');
         }
     };
 
@@ -805,10 +805,10 @@ export function AdminPayslipSection() {
                 <div className="admin-form-panel" style={{ padding: '1.5rem' }}>
                     <form onSubmit={handleUpload} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                         <div style={{ flex: '1', minWidth: '250px' }}>
-                            <label className="label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Select Payroll File (.xlsm)</label>
+                            <label className="label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Select Payroll File (.xlsx)</label>
                             <input 
                                 type="file" 
-                                accept=".xlsm"
+                                accept=".xlsx"
                                 onChange={(e) => setFile(e.target.files[0])} 
                                 style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--line)', borderRadius: '4px' }}
                             />
@@ -817,7 +817,7 @@ export function AdminPayslipSection() {
                             Upload Payslip
                         </button>
                     </form>
-                    <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--muted)' }}>Only Excel macro-enabled workbooks (.xlsm) are accepted.</p>
+                    <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--muted)' }}>Only Excel workbooks (.xlsx) are accepted.</p>
                 </div>
             </section>
 
