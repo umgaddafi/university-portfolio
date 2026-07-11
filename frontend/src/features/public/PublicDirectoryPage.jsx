@@ -125,6 +125,20 @@ function PublicDirectoryPage({ user }) {
                                     placeholder="Search name or role..."
                                 />
                             </div>
+                            <div className="field directory-filter-category">
+                                <select
+                                    className="select"
+                                    value={filters.category}
+                                    onChange={(event) => setFilters((current) => ({ ...current, category: event.target.value }))}
+                                >
+                                    <option value="">Category...</option>
+                                    {(directory.filters.categories || []).map((category) => (
+                                        <option key={category} value={category}>
+                                            {category}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="field directory-filter-faculty">
                                 <select
                                     className="select"
@@ -153,20 +167,6 @@ function PublicDirectoryPage({ user }) {
                                     {availableDepartments.map((department) => (
                                         <option key={department} value={department}>
                                             {department}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="field directory-filter-category">
-                                <select
-                                    className="select"
-                                    value={filters.category}
-                                    onChange={(event) => setFilters((current) => ({ ...current, category: event.target.value }))}
-                                >
-                                    <option value="">Category...</option>
-                                    {(directory.filters.categories || []).map((category) => (
-                                        <option key={category} value={category}>
-                                            {category}
                                         </option>
                                     ))}
                                 </select>

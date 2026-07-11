@@ -534,7 +534,7 @@
 
     .directory-filter-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 0.65rem;
     }
 
@@ -543,7 +543,17 @@
     }
 
     .directory-filter-search {
-        grid-column: 1 / -1;
+        grid-column: span 4;
+    }
+
+    .directory-filter-category {
+        grid-column: span 2;
+    }
+
+    .directory-filter-faculty,
+    .directory-filter-department,
+    .directory-filter-sort {
+        grid-column: span 2;
     }
 
     .directory-filter-grid .input,
@@ -3306,13 +3316,7 @@
         width: min(calc(100% - 1.5rem), 1360px);
     }
 
-    .directory-filter-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 
-    .directory-filter-search {
-        grid-column: 1 / -1;
-    }
 
     .directory-staff-grid {
         gap: 0.85rem;
@@ -3444,13 +3448,7 @@
         flex-wrap: wrap;
     }
 
-    .directory-filter-grid {
-        grid-template-columns: 1.6fr 1fr 1fr;
-    }
 
-    .directory-filter-search {
-        grid-column: 1 / -1;
-    }
 
     .directory-staff-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3734,13 +3732,7 @@
         margin-top: -2.6rem;
     }
 
-    .directory-filter-grid {
-        grid-template-columns: 1.5fr 1fr 1fr 1fr 0.9fr;
-    }
 
-    .directory-filter-search {
-        grid-column: auto;
-    }
 
     .directory-filter-sort {
         display: block;
@@ -8345,7 +8337,6 @@
     }
 
     .directory-filter-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0.4rem;
     }
 
