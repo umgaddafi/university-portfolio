@@ -233,4 +233,18 @@ class AdminController extends Controller
                 : 'Request rejected successfully.',
         ]);
     }
+
+    public function saveRolePermissions(Request $request, LegacyPortfolioService $service): JsonResponse
+    {
+        $payload = $request->validate([
+            'permissions' => ['required', 'array'],
+        ]);
+
+        $saved = $service->saveRolePermissions($payload['permissions']);
+
+        return response()->json([
+            'message' => 'Role permissions saved successfully.',
+            'rolePermissions' => $saved,
+        ]);
+    }
 }

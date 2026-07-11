@@ -77,7 +77,7 @@ function PublicDirectoryPage({ user }) {
                 <div className="directory-hero-overlay" aria-hidden="true" />
                 <div className="directory-hero-content">
                     <div className="directory-hero-copy">
-                        <h2 className="directory-page-title">Academic Staff Directory</h2>
+                        <h2 className="directory-page-title">JOSTUM Staff Portfolio</h2>
                         <p className="directory-hero-subtitle">
                             Explore our professors, researchers, and leaders across faculties and departments.
                         </p>
@@ -132,7 +132,7 @@ function PublicDirectoryPage({ user }) {
                                     onChange={(event) => setFilters((current) => ({ ...current, category: event.target.value }))}
                                 >
                                     <option value="">Category...</option>
-                                    {(directory.filters.categories || []).map((category) => (
+                                    {[...new Set(directory.filters.categories || [])].map((category) => (
                                         <option key={category} value={category}>
                                             {category}
                                         </option>
@@ -150,7 +150,7 @@ function PublicDirectoryPage({ user }) {
                                     }))}
                                 >
                                     <option value="">All Faculties</option>
-                                    {directory.filters.faculties.map((faculty) => (
+                                    {[...new Set(directory.filters.faculties || [])].map((faculty) => (
                                         <option key={faculty} value={faculty}>
                                             {faculty}
                                         </option>
@@ -164,7 +164,7 @@ function PublicDirectoryPage({ user }) {
                                     onChange={(event) => setFilters((current) => ({ ...current, department: event.target.value }))}
                                 >
                                     <option value="">All Depts</option>
-                                    {availableDepartments.map((department) => (
+                                    {[...new Set(availableDepartments || [])].map((department) => (
                                         <option key={department} value={department}>
                                             {department}
                                         </option>
@@ -178,7 +178,7 @@ function PublicDirectoryPage({ user }) {
                                     onChange={(event) => setFilters((current) => ({ ...current, rank: event.target.value }))}
                                 >
                                     <option value="">Rank...</option>
-                                    {(directory.filters.ranks || []).map((rank) => (
+                                    {[...new Set(directory.filters.ranks || [])].map((rank) => (
                                         <option key={rank} value={rank}>
                                             {rank}
                                         </option>

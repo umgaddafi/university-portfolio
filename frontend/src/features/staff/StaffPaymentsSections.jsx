@@ -14,7 +14,7 @@ export function StaffPaymentsSections({ staff }) {
     };
 
     return (
-        <div className="main-content" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div className="main-content" style={{ padding: '1rem', maxWidth: '1000px', margin: '0 auto', width: '100%', overflowX: 'hidden' }}>
             <style>
                 {`
                 @media print {
@@ -46,36 +46,45 @@ export function StaffPaymentsSections({ staff }) {
                 }
                 `}
             </style>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }} className="no-print">
-                <div style={{ backgroundColor: '#fff', border: '1px solid var(--line)', borderRadius: '8px', padding: '1.5rem', boxShadow: 'var(--card-shadow)' }}>
-                    <h3 style={{ fontSize: '0.875rem', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Number of months paid</h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--text)' }}>4</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }} className="no-print">
+                <div style={{ backgroundColor: '#fff', border: '1px solid var(--line)', borderRadius: '8px', padding: '1rem', boxShadow: 'var(--card-shadow)' }}>
+                    <h3 style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Months Paid</h3>
+                    <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--text)', margin: 0 }}>4</p>
                 </div>
-                <div style={{ backgroundColor: '#fff', border: '1px solid var(--line)', borderRadius: '8px', padding: '1.5rem', boxShadow: 'var(--card-shadow)' }}>
-                    <h3 style={{ fontSize: '0.875rem', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>This month</h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)' }}>Ready</p>
+                <div style={{ backgroundColor: '#fff', border: '1px solid var(--line)', borderRadius: '8px', padding: '1rem', boxShadow: 'var(--card-shadow)' }}>
+                    <h3 style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>This Month</h3>
+                    <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--success)', margin: 0 }}>Ready</p>
                 </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }} className="no-print">
-                <select value={year} onChange={e => setYear(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--input-border)' }}>
+            <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.5rem', marginBottom: '2rem', alignItems: 'center' }} className="no-print">
+                <select value={year} onChange={e => setYear(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--input-border)', flex: '1', minWidth: '0' }}>
                     {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
-                <select value={month} onChange={e => setMonth(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--input-border)' }}>
+                <select value={month} onChange={e => setMonth(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--input-border)', flex: '1', minWidth: '0' }}>
                     {months.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
-                <button onClick={downloadSlip} className="btn primary" style={{ marginLeft: 'auto' }}>Download Slip</button>
+                {months.indexOf(month) <= 5 && (
+                    <button onClick={downloadSlip} className="btn primary" style={{ marginLeft: 'auto', padding: '0.5rem 0.8rem', whiteSpace: 'nowrap' }}>Download Slip</button>
+                )}
             </div>
 
             {/* PAYSLIP CONTAINER */}
-            <div className="payslip-print-area" style={{ 
-                backgroundColor: '#fff', 
-                border: '1px solid #000', 
-                padding: '2rem', 
-                fontFamily: 'Arial, sans-serif',
-                color: '#000',
-                position: 'relative'
-            }}>
+            {months.indexOf(month) > 5 ? (
+                <div style={{ backgroundColor: '#fff', border: '1px solid var(--line)', borderRadius: '8px', padding: '3rem', textAlign: 'center', marginTop: '2rem' }}>
+                    <h2 style={{ color: 'var(--muted)', fontSize: '1.25rem' }}>Payslip for {month} {year} is not yet available</h2>
+                </div>
+            ) : (
+                <div style={{ width: '100%', maxWidth: '100%', overflowX: 'auto', paddingBottom: '1rem' }} className="payslip-mobile-wrapper">
+                    <div className="payslip-print-area" style={{ 
+                        minWidth: '800px',
+                        backgroundColor: '#fff', 
+                        border: '1px solid #000', 
+                        padding: '2rem', 
+                        fontFamily: 'Arial, sans-serif',
+                        color: '#000',
+                        position: 'relative'
+                    }}>
                 {/* Header Section */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                     <div style={{ display: 'flex', gap: '1rem' }}>
@@ -238,6 +247,8 @@ export function StaffPaymentsSections({ staff }) {
                 <div style={{ marginTop: '3rem', borderBottom: '1px dashed #999' }}></div>
 
             </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -96,5 +96,7 @@ Route::prefix('api')->group(function (): void {
             Route::post('/requests/approve-all', [AdminController::class, 'approveAllRequests']);
             Route::get('/review/{logId}', [AdminController::class, 'requestDetail']);
             Route::post('/review/{logId}', [AdminController::class, 'decideRequest']);
+
+            Route::post('/role-permissions', [AdminController::class, 'saveRolePermissions']);
         });
 });

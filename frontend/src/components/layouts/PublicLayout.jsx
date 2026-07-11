@@ -26,7 +26,7 @@ function PublicLayout({ user, children, fullWidth = false }) {
             {fullWidth ? children : <div className="public-shell">{children}</div>}
             <footer className="landing-footer">
                 <div className="landing-footer-inner">
-                    <div className="landing-footer-copy">&copy; {new Date().getFullYear()} JOSTUM ICT Directorate. All rights reserved.</div>
+                    <div className="landing-footer-copy">&copy; {new Date().getFullYear()} Developed by Engr. Dr. Philip Omolaye</div>
                     <Link className="landing-footer-action" to={footerLink.to}>
                         {footerLink.label}
                     </Link>

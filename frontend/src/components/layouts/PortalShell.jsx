@@ -393,7 +393,6 @@ function PortalShell({
                     {variant === 'staff' && resolvedStaffTopbar ? (
                         <div className="portal-sidebar-brand">
                             <Link className="staff-portal-topbar-brand-link" to={resolvedStaffTopbar.homeTo}>
-                                <StaffPortalBrandIcon className="staff-portal-topbar-brand-icon" />
                                 {!isDesktopCollapsed ? (
                                     <span className="staff-portal-topbar-brand-label">{resolvedStaffTopbar.brandLabel}</span>
                                 ) : null}
@@ -420,7 +419,7 @@ function PortalShell({
                                 <div className="portal-nav-section-links">
                                     {section.items.map((item) => (
                                         <NavLink
-                                            end={item.to === '/staff' || item.to === '/admin'}
+                                            end={['/staff', '/admin', '/staff/audit', '/staff/appraisal'].includes(item.to)}
                                             key={item.to}
                                             to={item.to}
                                             className={({ isActive }) => (isActive ? 'active' : '')}
@@ -440,7 +439,7 @@ function PortalShell({
                                 <p className="portal-nav-label">Navigation</p>
                                 {navItems.map((item) => (
                                     <NavLink
-                                        end={item.to === '/staff' || item.to === '/admin'}
+                                        end={['/staff', '/admin', '/staff/audit', '/staff/appraisal'].includes(item.to)}
                                         key={item.to}
                                         to={item.to}
                                         className={({ isActive }) => (isActive ? 'active' : '')}

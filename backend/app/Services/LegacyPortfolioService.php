@@ -25,6 +25,7 @@ class LegacyPortfolioService
         LegacySchemaManager::ensureReviewAndNotificationSchema($this->db);
         LegacySchemaManager::ensurePasswordResetSchema($this->db);
         LegacySchemaManager::ensureStaffIdCardSchema($this->db);
+        LegacySchemaManager::ensureRolePermissionsSchema($this->db);
     }
 
     public function getAuthenticatedUser(int $userId): ?array
@@ -276,6 +277,7 @@ class LegacyPortfolioService
                 ])->all(),
                 'platforms' => ['ORCID', 'Google Scholar', 'Scopus', 'ResearchGate'],
             ],
+            'rolePermissions' => $this->getRolePermissions(),
         ];
     }
 
@@ -288,8 +290,36 @@ class LegacyPortfolioService
             'departments' => $this->listDepartments(),
             'ranks' => $this->listRanks(),
             'requests' => $this->requestsSummary($requestSearch),
+            'rolePermissions' => $this->getRolePermissions(),
         ];
     }
+
+    public function getRolePermissions(): array
+    {
+        $rows = DB::table('role_permissions')->get();
+        $result = [];
+        foreach ($rows as $row) {
+            $perms = json_decode((string) $row->permissions, true);
+            $result[(string) $row->role_key] = is_array($perms) ? $perms : [];
+        }
+        return $result;
+    }
+
+    public function saveRolePermissions(array $permissions): array
+    {
+        foreach ($permissions as $roleKey => $perms) {
+            $roleKey = trim((string) $roleKey);
+            if ($roleKey === '') {
+                continue;
+            }
+            DB::table('role_permissions')->updateOrInsert(
+                ['role_key' => $roleKey],
+                ['permissions' => json_encode($perms), 'updated_at' => now()]
+            );
+        }
+        return $this->getRolePermissions();
+    }
+
 
     public function updateProfile(int $userId, int $staffId, array $data, ?UploadedFile $profilePhoto = null): array
     {

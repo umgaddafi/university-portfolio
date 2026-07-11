@@ -189,8 +189,8 @@ function PublicProfilePage({ user }) {
 
                             {canPreviewPrivate && (
                                 <div className="public-portfolio-utility">
-                                    <Link className="public-portfolio-utility-link" to="/">
-                                        Back to directory
+                                    <Link className="public-portfolio-utility-link" to="/staff">
+                                        Back to Dashboard
                                     </Link>
                                     <button
                                         className="public-portfolio-utility-link is-outline"

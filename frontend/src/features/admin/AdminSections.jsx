@@ -82,6 +82,7 @@ function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
     const [editingStaffId, setEditingStaffId] = useState(null);
     const [form, setForm] = useState({ first_name: '', last_name: '', email: '', staff_number: '', department_id: '', rank_id: '', staff_category_id: '', passport_url: '' });
     const [isSearchingStaff, setIsSearchingStaff] = useState(false);
+    const [searchSuccessful, setSearchSuccessful] = useState(false);
     const [searchError, setSearchError] = useState('');
     const { isPending, runPending } = usePendingAction();
     const confirm = useConfirm();
@@ -127,12 +128,14 @@ function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
             passport_url: item.profilePhotoUrl || '',
         });
         setEditingStaffId(item.staffId);
+        setSearchSuccessful(true);
         setShowCreateModal(true);
     }
 
     function closeCreateModal() {
         setForm({ first_name: '', last_name: '', email: '', staff_number: '', department_id: '', rank_id: '', staff_category_id: '', passport_url: '' });
         setEditingStaffId(null);
+        setSearchSuccessful(false);
         setShowCreateModal(false);
     }
 
@@ -156,6 +159,7 @@ function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
         
         setIsSearchingStaff(true);
         setSearchError('');
+        setSearchSuccessful(false);
         
         try {
             const response = await fetch(`/jostum-api/v1/staff/${form.staff_number}`);
@@ -192,6 +196,7 @@ function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
                     staff_category_id: matchedCategoryId || current.staff_category_id,
                     passport_url: result.data.passport_url || current.passport_url,
                 }));
+                setSearchSuccessful(true);
             } else {
                 throw new Error('Invalid data format received.');
             }
@@ -337,7 +342,7 @@ function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
                 actions={(
                     <>
                         <button type="button" className="admin-button admin-button-secondary" onClick={closeCreateModal} disabled={isSaving}>Cancel</button>
-                        <button type="submit" form="admin-staff-create-form" className="admin-button admin-button-primary" disabled={isSaving || isSearchingStaff}>
+                        <button type="submit" form="admin-staff-create-form" className="admin-button admin-button-primary" disabled={isSaving || isSearchingStaff || !searchSuccessful}>
                             {isSaving ? 'Saving...' : (editingStaffId ? 'Update Account' : 'Create Account')}
                         </button>
                     </>
@@ -381,47 +386,51 @@ function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
                         </div>
                     </Field>
                     
-                    {form.passport_url && (
-                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                            <img src={form.passport_url} alt="Staff Passport" style={{ width: '100px', height: '100px', objectFit: 'fill', borderRadius: '8px', border: '2px solid var(--border-light)' }} />
-                        </div>
+                    {searchSuccessful && (
+                        <>
+                            {form.passport_url && (
+                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                                    <img src={form.passport_url} alt="Staff Passport" style={{ width: '100px', height: '100px', objectFit: 'fill', borderRadius: '8px', border: '2px solid var(--border-light)' }} />
+                                </div>
+                            )}
+                            
+                            <div className="admin-modal-grid">
+                                <Field label="First name"><input className="input" value={form.first_name} onChange={(event) => setForm((current) => ({ ...current, first_name: event.target.value }))} required /></Field>
+                                <Field label="Last name"><input className="input" value={form.last_name} onChange={(event) => setForm((current) => ({ ...current, last_name: event.target.value }))} required /></Field>
+                            </div>
+                            <div className="admin-modal-grid">
+                                <Field label="Email"><input className="input" type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} required /></Field>
+                                <Field label="Staff Category">
+                                    <select className="select" value={form.staff_category_id} onChange={(event) => setForm((current) => ({ ...current, staff_category_id: event.target.value, rank_id: '' }))}>
+                                        <option value="">Select category</option>
+                                        {staff.filters.categories?.map((category) => (
+                                            <option key={category.id} value={category.id}>{category.name}</option>
+                                        ))}
+                                    </select>
+                                </Field>
+                            </div>
+                            <div className="admin-modal-grid">
+                                <Field label="Department">
+                                    <select className="select" value={form.department_id} onChange={(event) => setForm((current) => ({ ...current, department_id: event.target.value }))} required>
+                                        <option value="">Select department</option>
+                                        {staff.filters.departments.map((department) => (
+                                            <option key={department.id} value={department.id}>{department.name}</option>
+                                        ))}
+                                    </select>
+                                </Field>
+                                <Field label="Rank">
+                                    <select className="select" value={form.rank_id} onChange={(event) => setForm((current) => ({ ...current, rank_id: event.target.value }))} required disabled={!form.staff_category_id && staff.filters.categories?.length > 0}>
+                                        <option value="">Select rank</option>
+                                        {staff.filters.ranks
+                                            .filter(rank => !form.staff_category_id || String(rank.category_id) === String(form.staff_category_id))
+                                            .map((rank) => (
+                                            <option key={rank.id} value={rank.id}>{rank.name}</option>
+                                        ))}
+                                    </select>
+                                </Field>
+                            </div>
+                        </>
                     )}
-                    
-                    <div className="admin-modal-grid">
-                        <Field label="First name"><input className="input" value={form.first_name} onChange={(event) => setForm((current) => ({ ...current, first_name: event.target.value }))} required /></Field>
-                        <Field label="Last name"><input className="input" value={form.last_name} onChange={(event) => setForm((current) => ({ ...current, last_name: event.target.value }))} required /></Field>
-                    </div>
-                    <div className="admin-modal-grid">
-                        <Field label="Email"><input className="input" type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} required /></Field>
-                        <Field label="Staff Category">
-                            <select className="select" value={form.staff_category_id} onChange={(event) => setForm((current) => ({ ...current, staff_category_id: event.target.value, rank_id: '' }))}>
-                                <option value="">Select category</option>
-                                {staff.filters.categories?.map((category) => (
-                                    <option key={category.id} value={category.id}>{category.name}</option>
-                                ))}
-                            </select>
-                        </Field>
-                    </div>
-                    <div className="admin-modal-grid">
-                        <Field label="Department">
-                            <select className="select" value={form.department_id} onChange={(event) => setForm((current) => ({ ...current, department_id: event.target.value }))} required>
-                                <option value="">Select department</option>
-                                {staff.filters.departments.map((department) => (
-                                    <option key={department.id} value={department.id}>{department.name}</option>
-                                ))}
-                            </select>
-                        </Field>
-                        <Field label="Rank">
-                            <select className="select" value={form.rank_id} onChange={(event) => setForm((current) => ({ ...current, rank_id: event.target.value }))} required disabled={!form.staff_category_id && staff.filters.categories?.length > 0}>
-                                <option value="">Select rank</option>
-                                {staff.filters.ranks
-                                    .filter(rank => !form.staff_category_id || String(rank.category_id) === String(form.staff_category_id))
-                                    .map((rank) => (
-                                    <option key={rank.id} value={rank.id}>{rank.name}</option>
-                                ))}
-                            </select>
-                        </Field>
-                    </div>
                 </form>
             </AdminModal>
         </>
@@ -764,6 +773,91 @@ export {
     AdminReportsSection,
     AdminVerificationQueueSection,
 } from './AdminOperationsSections';
+
+export function AdminPayslipSection() {
+    const [file, setFile] = useState(null);
+    const dummyData = [
+        { month: 'April 2026', status: 'Pending Review', date: '2026-05-02' },
+        { month: 'March 2026', status: 'Processed', date: '2026-04-01' },
+        { month: 'February 2026', status: 'Processed', date: '2026-03-03' },
+        { month: 'January 2026', status: 'Processed', date: '2026-02-05' },
+    ];
+
+    const handleUpload = (e) => {
+        e.preventDefault();
+        if (file) {
+            alert(`Dummy upload initiated for: ${file.name}`);
+        } else {
+            alert('Please select an .xlsm file first.');
+        }
+    };
+
+    return (
+        <>
+            <AdminPageHeader
+                title="Payslip Management"
+                subtitle="Upload and manage staff payroll data"
+            />
+            <section className="admin-panel card" style={{ marginBottom: '2rem' }}>
+                <div className="admin-panel-header">
+                    <h3>Upload New Payslip Data</h3>
+                </div>
+                <div className="admin-form-panel" style={{ padding: '1.5rem' }}>
+                    <form onSubmit={handleUpload} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1', minWidth: '250px' }}>
+                            <label className="label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Select Payroll File (.xlsm)</label>
+                            <input 
+                                type="file" 
+                                accept=".xlsm"
+                                onChange={(e) => setFile(e.target.files[0])} 
+                                style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--line)', borderRadius: '4px' }}
+                            />
+                        </div>
+                        <button type="submit" className="admin-button admin-button-primary" style={{ padding: '0.6rem 1.5rem', whiteSpace: 'nowrap' }}>
+                            Upload Payslip
+                        </button>
+                    </form>
+                    <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--muted)' }}>Only Excel macro-enabled workbooks (.xlsm) are accepted.</p>
+                </div>
+            </section>
+
+            <section className="admin-panel card">
+                <div className="admin-panel-header">
+                    <h3>Payslip Upload History</h3>
+                </div>
+                <div className="admin-table-wrap">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Payroll Month</th>
+                                <th>Status</th>
+                                <th>Date Uploaded</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {dummyData.map((item, index) => (
+                                <tr key={index}>
+                                    <td><strong>{item.month}</strong></td>
+                                    <td>
+                                        <span className={`admin-badge ${item.status === 'Processed' ? 'is-approved' : 'is-pending'}`}>
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                    <td>{item.date}</td>
+                                    <td>
+                                        <button className="admin-icon-button" style={{ background: 'none', border: 'none', cursor: 'pointer', marginRight: '0.5rem' }} title="View Details">👁</button>
+                                        <button className="admin-icon-button" style={{ color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer' }} title="Delete">🗑</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </>
+    );
+}
 
 export {
     AdminDashboardSection,

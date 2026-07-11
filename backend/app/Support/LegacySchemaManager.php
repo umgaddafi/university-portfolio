@@ -131,4 +131,32 @@ class LegacySchemaManager
 
         $done = true;
     }
+
+    public static function ensureRolePermissionsSchema(ConnectionInterface $db): void
+    {
+        static $done = false;
+
+        if ($done) {
+            return;
+        }
+
+        try {
+            $db->statement(
+                <<<SQL
+                CREATE TABLE IF NOT EXISTS role_permissions (
+                    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    role_key VARCHAR(30) NOT NULL,
+                    permissions JSON NOT NULL,
+                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uniq_role_key (role_key)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+                SQL
+            );
+        } catch (Throwable) {
+            // Keep the application usable even if the legacy schema cannot be upgraded automatically.
+        }
+
+        $done = true;
+    }
 }

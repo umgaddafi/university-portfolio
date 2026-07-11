@@ -59,10 +59,6 @@ function StaffDashboard({ data, onDownloadCv }) {
                         <StaffDashboardActionIcon name="shield" />
                         <span>Private View</span>
                     </Link>
-                    <button type="button" className="staff-dashboard-hero-button is-tertiary" onClick={onDownloadCv}>
-                        <StaffDashboardActionIcon name="download" />
-                        <span>Download CV</span>
-                    </button>
                 </div>
             </section>
 

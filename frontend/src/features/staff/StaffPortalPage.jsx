@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ErrorState, LoadingScreen } from '../../components/common/states';
 import { PortalShell } from '../../components/layouts/PortalShell';
@@ -25,12 +26,50 @@ import { StaffAppraisalSections } from './StaffAppraisalSections';
 import { StaffAuditSections } from './StaffAuditSections';
 import { StaffPaymentsSections } from './StaffPaymentsSections';
 
+/**
+ * Extracts a permission key from a nav item's route path.
+ * e.g. '/staff/appraisal/my-appraisals' -> 'appraisal/my-appraisals'
+ *      '/staff/profile' -> 'profile'
+ *      '/staff' -> 'dashboard'
+ */
+function extractPermissionKey(to) {
+    const parts = to.replace(/^\/staff\/?/, '').replace(/\/$/, '');
+    return parts || 'dashboard';
+}
+
+function filterNavByPermissions(allSections, rolePermissions, userRole) {
+    // Admin and Moderator roles always see everything
+    if (userRole === 'Admin' || userRole === 'Moderator') {
+        return allSections;
+    }
+
+    const perms = rolePermissions?.[userRole] || {};
+    // If no permissions have been configured yet, show everything (permissive default)
+    const hasAnyConfig = Object.keys(perms).length > 0;
+    if (!hasAnyConfig) {
+        return allSections;
+    }
+
+    return allSections
+        .map((section) => {
+            const filteredItems = section.items.filter((item) => {
+                const key = extractPermissionKey(item.to);
+                // Dashboard is always visible
+                if (key === 'dashboard') return true;
+                // If the key is explicitly set in perms, use its value; otherwise default to visible
+                return key in perms ? Boolean(perms[key]) : true;
+            });
+            return { ...section, items: filteredItems };
+        })
+        .filter((section) => section.items.length > 0);
+}
+
 function StaffPortalPage({ user, onLogout, showFlash }) {
     const location = useLocation();
     const { data, loading, error, load } = usePortalResource('/api/staff/portal');
     const section = location.pathname.split('/')[2] || 'dashboard';
 
-    const navSections = [
+    const allNavSections = [
         {
             title: null,
             items: [
@@ -92,7 +131,14 @@ function StaffPortalPage({ user, onLogout, showFlash }) {
             ],
         },
     ];
+
+    const navSections = useMemo(
+        () => filterNavByPermissions(allNavSections, data?.rolePermissions, user?.role),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [data?.rolePermissions, user?.role]
+    );
     const navItems = navSections.flatMap((group) => group.items);
+
 
     async function mutate(path, options, successMessage) {
         try {

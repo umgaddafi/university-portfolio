@@ -10,11 +10,13 @@ import {
     AdminVerificationQueueSection,
     AdminDashboardSection,
     AdminRequestsSection,
+    AdminPayslipSection,
     AdminStaffSection,
     CollegeManager,
     DepartmentManager,
     RankManager,
 } from './AdminSections';
+import { AdminPermissionsSection } from './AdminPermissionsSection';
 
 function formatMutationMessage(result) {
     const message = result.message || 'Saved successfully.';
@@ -52,6 +54,13 @@ function AdminPortalPage({ user, onLogout, showFlash }) {
             items: [
                 { to: '/admin/staff', label: 'Staff Directory', navLabel: 'Staff Directory', icon: 'staff' },
                 { to: '/admin/access', label: 'User Accounts & Roles', navLabel: 'User Accounts & Roles', icon: 'roles' },
+                { to: '/admin/permissions', label: 'Permission Matrix', navLabel: 'Permission Matrix', icon: 'settings' },
+            ],
+        },
+        {
+            title: 'Payments',
+            items: [
+                { to: '/admin/payslip', label: 'Payslip', navLabel: 'Payslip', icon: 'grants' },
             ],
         },
         {
@@ -114,10 +123,21 @@ function AdminPortalPage({ user, onLogout, showFlash }) {
         );
     } else if (section === 'reports') {
         content = <AdminReportsSection dashboard={data.dashboard} staff={data.staff} requests={data.requests} />;
+    } else if (section === 'permissions') {
+        content = (
+            <AdminPermissionsSection
+                rolePermissions={data.rolePermissions}
+                onSave={async (permissions) => {
+                    await mutate('/api/admin/role-permissions', { method: 'POST', data: { permissions } });
+                }}
+            />
+        );
     } else if (section === 'colleges') {
         content = <CollegeManager items={data.colleges} onSave={(payload, id) => mutate(id ? `/api/admin/colleges/${id}` : '/api/admin/colleges', { method: id ? 'PUT' : 'POST', data: payload })} onDelete={(id) => mutate(`/api/admin/colleges/${id}`, { method: 'DELETE' })} />;
     } else if (section === 'departments') {
         content = <DepartmentManager items={data.departments} colleges={data.colleges} onSave={(payload, id) => mutate(id ? `/api/admin/departments/${id}` : '/api/admin/departments', { method: id ? 'PUT' : 'POST', data: payload })} onDelete={(id) => mutate(`/api/admin/departments/${id}`, { method: 'DELETE' })} />;
+    } else if (section === 'payslip') {
+        content = <AdminPayslipSection />;
     } else {
         content = <RankManager items={data.ranks} onSave={(payload, id) => mutate(id ? `/api/admin/ranks/${id}` : '/api/admin/ranks', { method: id ? 'PUT' : 'POST', data: payload })} onDelete={(id) => mutate(`/api/admin/ranks/${id}`, { method: 'DELETE' })} />;
     }
