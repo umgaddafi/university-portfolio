@@ -8325,7 +8325,8 @@
     }
 
     .directory-hero-stat-card {
-        padding: 0.7rem 0.3rem;
+        padding: 0.5rem 0.2rem;
+        border-radius: 1rem;
     }
 
     .directory-hero-stat-card:nth-child(4) {
@@ -8333,11 +8334,11 @@
     }
 
     .directory-hero-stat-value {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
     }
 
     .directory-hero-stat-label {
-        font-size: 0.58rem;
+        font-size: 0.52rem;
     }
 
     .directory-filter-grid {
