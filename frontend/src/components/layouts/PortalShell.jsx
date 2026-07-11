@@ -38,17 +38,7 @@ function PortalShell({
 
         return window.matchMedia('(max-width: 1023px)').matches;
     });
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-        if (typeof window === 'undefined') {
-            return false;
-        }
-
-        try {
-            return window.localStorage.getItem('portal-sidebar-collapsed') === '1';
-        } catch {
-            return false;
-        }
-    });
+    const isSidebarCollapsed = false;
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const resolvedNavItems = navSections ? navSections.flatMap((section) => section.items) : navItems;
     const homePath = resolvedNavItems[0]?.to || '/';
@@ -87,18 +77,6 @@ function PortalShell({
             setIsMobileSidebarOpen(false);
         }
     }, [isMobileViewport]);
-
-    useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        try {
-            window.localStorage.setItem('portal-sidebar-collapsed', isSidebarCollapsed ? '1' : '0');
-        } catch {
-            // Ignore storage failures and keep the UI interactive.
-        }
-    }, [isSidebarCollapsed]);
 
     useEffect(() => {
         if (typeof document === 'undefined') {
@@ -378,23 +356,17 @@ function PortalShell({
                                 <p>{user.rankName || user.role}</p>
                                 <span>{user.staffNumber || user.email || 'Active portal access'}</span>
                             </div>
-                            <button
-                                type="button"
-                                className="portal-sidebar-toggle"
-                                onClick={() => {
-                                    if (isMobileViewport) {
-                                        setIsMobileSidebarOpen(false);
-                                        return;
-                                    }
-
-                                    setIsSidebarCollapsed((current) => !current);
-                                }}
-                                aria-label={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
-                                aria-pressed={isMobileViewport ? isMobileSidebarOpen : isSidebarCollapsed}
-                                title={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
-                            >
-                                {isMobileViewport ? <MenuToggleIcon open={isMobileSidebarOpen} /> : <SidebarToggleIcon collapsed={isSidebarCollapsed} />}
-                            </button>
+                            {isMobileViewport ? (
+                                <button
+                                    type="button"
+                                    className="portal-sidebar-toggle"
+                                    onClick={() => setIsMobileSidebarOpen(false)}
+                                    aria-label="Close sidebar"
+                                    title="Close sidebar"
+                                >
+                                    <MenuToggleIcon open={isMobileSidebarOpen} />
+                                </button>
+                            ) : null}
                         </div>
                     ) : null}
                     {variant === 'admin' && resolvedAdminTopbar ? (
@@ -405,22 +377,17 @@ function PortalShell({
                                     <span className="admin-portal-topbar-brand-label">{resolvedAdminTopbar.brandLabel}</span>
                                 ) : null}
                             </Link>
-                            <button
-                                type="button"
-                                className="portal-sidebar-toggle"
-                                onClick={() => {
-                                    if (isMobileViewport) {
-                                        setIsMobileSidebarOpen(false);
-                                        return;
-                                    }
-                                    setIsSidebarCollapsed((current) => !current);
-                                }}
-                                aria-label={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
-                                aria-pressed={isMobileViewport ? isMobileSidebarOpen : isSidebarCollapsed}
-                                title={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
-                            >
-                                {isMobileViewport ? <MenuToggleIcon open={isMobileSidebarOpen} /> : <SidebarToggleIcon collapsed={isSidebarCollapsed} />}
-                            </button>
+                            {isMobileViewport ? (
+                                <button
+                                    type="button"
+                                    className="portal-sidebar-toggle"
+                                    onClick={() => setIsMobileSidebarOpen(false)}
+                                    aria-label="Close sidebar"
+                                    title="Close sidebar"
+                                >
+                                    <MenuToggleIcon open={isMobileSidebarOpen} />
+                                </button>
+                            ) : null}
                         </div>
                     ) : null}
                     {variant === 'staff' && resolvedStaffTopbar ? (
@@ -431,22 +398,17 @@ function PortalShell({
                                     <span className="staff-portal-topbar-brand-label">{resolvedStaffTopbar.brandLabel}</span>
                                 ) : null}
                             </Link>
-                            <button
-                                type="button"
-                                className="portal-sidebar-toggle"
-                                onClick={() => {
-                                    if (isMobileViewport) {
-                                        setIsMobileSidebarOpen(false);
-                                        return;
-                                    }
-                                    setIsSidebarCollapsed((current) => !current);
-                                }}
-                                aria-label={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
-                                aria-pressed={isMobileViewport ? isMobileSidebarOpen : isSidebarCollapsed}
-                                title={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
-                            >
-                                {isMobileViewport ? <MenuToggleIcon open={isMobileSidebarOpen} /> : <SidebarToggleIcon collapsed={isSidebarCollapsed} />}
-                            </button>
+                            {isMobileViewport ? (
+                                <button
+                                    type="button"
+                                    className="portal-sidebar-toggle"
+                                    onClick={() => setIsMobileSidebarOpen(false)}
+                                    aria-label="Close sidebar"
+                                    title="Close sidebar"
+                                >
+                                    <MenuToggleIcon open={isMobileSidebarOpen} />
+                                </button>
+                            ) : null}
                         </div>
                     ) : null}
                 </div>
