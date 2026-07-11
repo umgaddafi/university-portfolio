@@ -8349,6 +8349,10 @@
         display: block !important;
     }
 
+    .portal-sidebar-brand {
+        display: none;
+    }
+
     .landing-footer-inner {
         flex-wrap: nowrap;
         justify-content: space-between;
