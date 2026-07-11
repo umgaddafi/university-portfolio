@@ -8349,6 +8349,23 @@
         display: block !important;
     }
 
+    .landing-footer-inner {
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .landing-footer-copy {
+        font-size: 0.72rem;
+        line-height: 1.2;
+    }
+
+    .landing-footer-action {
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
     .staff-page-action-desktop {
         display: none;
     }
