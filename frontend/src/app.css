@@ -466,7 +466,7 @@
 
     .directory-hero-action.is-primary {
         background: rgba(255, 255, 255, 0.98);
-        color: rgb(var(--accent-deep-rgb));
+        color: #064e3b !important;
         border: 1px solid rgba(255, 255, 255, 0.88);
     }
 
@@ -480,6 +480,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
         gap: 0.7rem;
+        justify-items: stretch;
     }
 
     .directory-hero-stat-card {

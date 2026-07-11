@@ -10,12 +10,12 @@ import { api } from '../../lib/api';
 import { getErrorMessage } from '../../utils/formatters';
 
 function PublicDirectoryPage({ user }) {
-    const [directory, setDirectory] = useState({ items: [], filters: { faculties: [], departments: [] } });
-    const [filters, setFilters] = useState({ search: '', faculty: '', department: '', sort: 'rank' });
+    const [directory, setDirectory] = useState({ items: [], filters: { faculties: [], departments: [], ranks: [] } });
+    const [filters, setFilters] = useState({ search: '', faculty: '', department: '', rank: '' });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [retryKey, setRetryKey] = useState(0);
-    const { departments: remoteDepartments } = useStaffDepartmentOptions();
+
 
     useEffect(() => {
         let cancelled = false;
@@ -48,7 +48,7 @@ function PublicDirectoryPage({ user }) {
     }, [retryKey]);
 
     const normalizedSearch = filters.search.trim().toLowerCase();
-    const departmentOptions = remoteDepartments.length > 0 ? remoteDepartments : directory.filters.departments;
+    const departmentOptions = directory.filters.departments || [];
     const availableDepartments = departmentOptions.filter((department) => (
         filters.faculty === ''
             || directory.items.some((item) => item.faculty === filters.faculty && item.department === department)
@@ -60,15 +60,9 @@ function PublicDirectoryPage({ user }) {
                 || item.role.toLowerCase().includes(normalizedSearch);
             const matchesFaculty = filters.faculty === '' || item.faculty === filters.faculty;
             const matchesDepartment = filters.department === '' || item.department === filters.department;
+            const matchesRank = filters.rank === '' || item.role === filters.rank;
 
-            return matchesSearch && matchesFaculty && matchesDepartment;
-        })
-        .sort((left, right) => {
-            if (filters.sort === 'alpha') {
-                return left.name.localeCompare(right.name);
-            }
-
-            return 0;
+            return matchesSearch && matchesFaculty && matchesDepartment && matchesRank;
         });
 
     return (
@@ -107,7 +101,7 @@ function PublicDirectoryPage({ user }) {
                             <div className="directory-hero-stat-label">Faculties</div>
                         </div>
                         <div className="directory-hero-stat-card">
-                            <p className="directory-hero-stat-value">{departmentOptions.length}</p>
+                            <p className="directory-hero-stat-value">{directory.filters.departments?.length || 0}</p>
                             <div className="directory-hero-stat-label">Departments</div>
                         </div>
                         <div className="directory-hero-stat-card">
@@ -165,11 +159,15 @@ function PublicDirectoryPage({ user }) {
                             <div className="field directory-filter-sort">
                                 <select
                                     className="select"
-                                    value={filters.sort}
-                                    onChange={(event) => setFilters((current) => ({ ...current, sort: event.target.value }))}
+                                    value={filters.rank}
+                                    onChange={(event) => setFilters((current) => ({ ...current, rank: event.target.value }))}
                                 >
-                                    <option value="rank">By Rank</option>
-                                    <option value="alpha">A-Z</option>
+                                    <option value="">Rank...</option>
+                                    {(directory.filters.ranks || []).map((rank) => (
+                                        <option key={rank} value={rank}>
+                                            {rank}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

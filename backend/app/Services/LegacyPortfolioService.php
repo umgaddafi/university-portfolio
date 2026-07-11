@@ -196,6 +196,7 @@ class LegacyPortfolioService
             'filters' => [
                 'faculties' => DB::table('college')->orderBy('name')->pluck('name')->all(),
                 'departments' => DB::table('department')->orderBy('name')->pluck('name')->all(),
+                'ranks' => DB::table('ranks')->orderBy('id')->pluck('name')->all(),
             ],
         ];
     }
