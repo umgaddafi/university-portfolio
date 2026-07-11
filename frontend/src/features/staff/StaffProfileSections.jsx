@@ -12,6 +12,7 @@ import {
     qualificationDegreeOptions,
 } from './constants';
 import { StaffModal, StaffPageHeader } from './StaffShared';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 function ProfileSection({ staff, ranks, onSubmit }) {
     const [form, setForm] = useState({});
@@ -141,6 +142,7 @@ function QualificationsSection({ items, onCreate, onDelete }) {
     const [showModal, setShowModal] = useState(false);
     const { countries, loading: countriesLoading, error: countriesError } = useCountryOptions();
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSubmitting = isPending('create-qualification');
 
     function openModal() {
@@ -209,12 +211,14 @@ function QualificationsSection({ items, onCreate, onDelete }) {
                                 <button
                                     type="button"
                                     className="staff-pill-button is-danger"
-                                    onClick={() => {
-                                        if (!window.confirm('Request removal of this qualification?')) {
-                                            return;
-                                        }
-
-                                        void runPending(`delete-qualification-${item.qualification_id}`, () => onDelete(item.qualification_id));
+                                    onClick={async () => {
+                                        await confirm({
+                                            title: 'Confirm Deletion',
+                                            message: 'Request removal of this qualification?',
+                                            confirmText: 'Remove',
+                                            danger: true,
+                                            action: () => runPending(`delete-qualification-${item.qualification_id}`, () => onDelete(item.qualification_id))
+                                        });
                                     }}
                                     disabled={isPending(`delete-qualification-${item.qualification_id}`)}
                                 >
@@ -292,6 +296,7 @@ function QualificationsSection({ items, onCreate, onDelete }) {
 function ResearchSection({ items, onCreate, onDelete }) {
     const [name, setName] = useState('');
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSubmitting = isPending('create-research-area');
 
     return (
@@ -327,12 +332,14 @@ function ResearchSection({ items, onCreate, onDelete }) {
                                     <span>{item.name}</span>
                                     <button
                                         type="button"
-                                        onClick={() => {
-                                            if (!window.confirm('Remove this research area?')) {
-                                                return;
-                                            }
-
-                                            void runPending(`delete-research-${item.research_area_id}`, () => onDelete(item.research_area_id));
+                                        onClick={async () => {
+                                            await confirm({
+                                                title: 'Confirm Deletion',
+                                                message: 'Remove this research area?',
+                                                confirmText: 'Remove',
+                                                danger: true,
+                                                action: () => runPending(`delete-research-${item.research_area_id}`, () => onDelete(item.research_area_id))
+                                            });
                                         }}
                                         disabled={isPending(`delete-research-${item.research_area_id}`)}
                                     >
@@ -353,6 +360,7 @@ function PublicationsSection({ items, onSave, onDelete }) {
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState(publicationFormDefaults);
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSubmitting = isPending('save-publication');
 
     useEffect(() => {
@@ -430,12 +438,14 @@ function PublicationsSection({ items, onSave, onDelete }) {
                                 <button
                                     type="button"
                                     className="staff-icon-text-button is-danger"
-                                    onClick={() => {
-                                        if (!window.confirm('Remove this publication?')) {
-                                            return;
-                                        }
-
-                                        void runPending(`delete-publication-${item.publication_id}`, () => onDelete(item.publication_id));
+                                    onClick={async () => {
+                                        await confirm({
+                                            title: 'Confirm Deletion',
+                                            message: 'Remove this publication?',
+                                            confirmText: 'Remove',
+                                            danger: true,
+                                            action: () => runPending(`delete-publication-${item.publication_id}`, () => onDelete(item.publication_id))
+                                        });
                                     }}
                                     disabled={isPending(`delete-publication-${item.publication_id}`)}
                                 >

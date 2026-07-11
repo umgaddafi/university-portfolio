@@ -31,13 +31,13 @@ class LegacyPortfolioService
     {
         $row = DB::table('user_account as ua')
             ->leftJoin('staff as s', 'ua.staff_id', '=', 's.staff_id')
-            ->leftJoin('academic_rank as r', 's.rank_id', '=', 'r.rank_id')
+            ->leftJoin('ranks as r', 's.rank_id', '=', 'r.id')
             ->leftJoin('department as d', 's.department_id', '=', 'd.department_id')
             ->leftJoin('college as c', 'd.college_id', '=', 'c.college_id')
             ->selectRaw(
                 'ua.user_id, ua.staff_id, ua.username, ua.role, ua.is_active, ua.must_change_password,
                 s.title, s.first_name, s.middle_name, s.last_name, s.email, s.profile_photo, s.staff_number,
-                r.rank_name, d.name as department_name, c.name as college_name'
+                r.name as rank_name, d.name as department_name, c.name as college_name'
             )
             ->where('ua.user_id', $userId)
             ->first();
@@ -145,12 +145,12 @@ class LegacyPortfolioService
     public function publicDirectory(array $filters = []): array
     {
         $query = DB::table('staff as s')
-            ->leftJoin('academic_rank as r', 's.rank_id', '=', 'r.rank_id')
+            ->leftJoin('ranks as r', 's.rank_id', '=', 'r.id')
             ->join('department as d', 's.department_id', '=', 'd.department_id')
             ->join('college as c', 'd.college_id', '=', 'c.college_id')
             ->selectRaw(
                 "s.staff_id, CONCAT(COALESCE(s.title, ''), ' ', s.first_name, ' ', s.last_name) as name,
-                COALESCE(r.rank_name, 'Unassigned') as role, COALESCE(r.rank_level, 9999) as rank_level_value,
+                COALESCE(r.name, 'Unassigned') as role, COALESCE(r.id, 9999) as rank_level_value,
                 d.name as department, c.name as faculty, IFNULL(s.profile_photo, '') as profile_photo"
             )
             ->where('s.is_active', 1);
@@ -259,10 +259,10 @@ class LegacyPortfolioService
                 'unreadCount' => DB::table('staff_notification')->where('user_id', $userId)->where('is_read', 0)->count(),
             ],
             'referenceData' => [
-                'ranks' => DB::table('academic_rank')->orderBy('rank_level')->orderBy('rank_name')->get()->map(fn ($row) => [
-                    'id' => (int) $row->rank_id,
-                    'name' => (string) $row->rank_name,
-                    'level' => (int) $row->rank_level,
+                'ranks' => DB::table('ranks')->orderBy('name')->get()->map(fn ($row) => [
+                    'id' => (int) $row->id,
+                    'name' => (string) $row->name,
+                    'level' => (int) $row->id,
                 ])->all(),
                 'courses' => DB::table('course')->orderBy('course_code')->get()->map(fn ($row) => [
                     'id' => (int) $row->course_id,
@@ -296,7 +296,7 @@ class LegacyPortfolioService
         }
 
         $requestedRankId = (int) ($data['rank_id'] ?? 0);
-        if ($requestedRankId > 0 && ! DB::table('academic_rank')->where('rank_id', $requestedRankId)->exists()) {
+        if ($requestedRankId > 0 && ! DB::table('ranks')->where('id', $requestedRankId)->exists()) {
             throw new RuntimeException('The selected academic rank is invalid.');
         }
 
@@ -1036,29 +1036,30 @@ class LegacyPortfolioService
         }
 
         if ($rankId) {
-            DB::table('academic_rank')->where('rank_id', $rankId)->update([
-                'rank_name' => $name,
-                'rank_level' => $level,
+            DB::table('ranks')->where('id', $rankId)->update([
+                'name' => $name,
+                'updated_at' => now(),
             ]);
         } else {
-            $rankId = (int) DB::table('academic_rank')->insertGetId([
-                'rank_name' => $name,
-                'rank_level' => $level,
+            $rankId = (int) DB::table('ranks')->insertGetId([
+                'name' => $name,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
-        $row = DB::table('academic_rank')->where('rank_id', $rankId)->first();
+        $row = DB::table('ranks')->where('id', $rankId)->first();
 
         return [
-            'id' => (int) $row->rank_id,
-            'name' => (string) $row->rank_name,
-            'level' => (int) $row->rank_level,
+            'id' => (int) $row->id,
+            'name' => (string) $row->name,
+            'level' => (int) $row->id,
         ];
     }
 
     public function deleteRank(int $rankId): void
     {
-        DB::table('academic_rank')->where('rank_id', $rankId)->delete();
+        DB::table('ranks')->where('id', $rankId)->delete();
     }
 
     public function requestHistory(int $staffId): array
@@ -1112,10 +1113,24 @@ class LegacyPortfolioService
         $data = (array) $log;
         $data['comparison'] = $this->buildRequestComparison($data, (int) ($log->staff_id ?? 0));
 
-        return $data;
+        return [
+            'staff' => $this->mapStaffAccessRow((object) $staffRow),
+            'log' => $this->mapAuditLogDetailRow((object) $logRow),
+        ];
     }
 
-    public function decideRequest(int $adminUserId, int $logId, string $decision, string $rejectionReason = ''): void
+    public function approveAllRequests(int $adminUserId): void
+    {
+        $pendingLogs = DB::table('audit_log')
+            ->where('status', 'Pending')
+            ->get();
+
+        foreach ($pendingLogs as $log) {
+            $this->decideRequest($adminUserId, (int) $log->log_id, 'approve', '');
+        }
+    }
+
+    public function decideRequest(int $adminUserId, int $logId, string $decision, string $rejectionReason): void
     {
         $log = (array) DB::table('change_log')->where('log_id', $logId)->first();
 
@@ -1191,7 +1206,7 @@ class LegacyPortfolioService
     {
         $query = DB::table('staff as s')
             ->leftJoin('department as d', 's.department_id', '=', 'd.department_id')
-            ->leftJoin('academic_rank as r', 's.rank_id', '=', 'r.rank_id')
+            ->leftJoin('ranks as r', 's.rank_id', '=', 'r.id')
             ->leftJoin('user_account as ua', 's.staff_id', '=', 'ua.staff_id')
             ->select(
                 's.staff_id',
@@ -1199,8 +1214,10 @@ class LegacyPortfolioService
                 's.first_name',
                 's.last_name',
                 's.email',
+                's.department_id',
+                's.rank_id',
                 'd.name as department_name',
-                'r.rank_name',
+                'r.name as rank_name',
                 'ua.user_id as account_user_id',
                 'ua.username',
                 'ua.role',
@@ -1245,6 +1262,7 @@ class LegacyPortfolioService
             'filters' => [
                 'departments' => $this->listDepartments(),
                 'ranks' => $this->listRanks(),
+                'categories' => $this->listStaffCategories(),
             ],
         ];
     }
@@ -1279,14 +1297,26 @@ class LegacyPortfolioService
 
     private function listRanks(): array
     {
-        return DB::table('academic_rank')
-            ->orderBy('rank_level')
-            ->orderBy('rank_name')
+        return DB::table('ranks')
+            ->orderBy('name')
             ->get()
             ->map(fn ($row) => [
-                'id' => (int) $row->rank_id,
-                'name' => (string) $row->rank_name,
-                'level' => (int) $row->rank_level,
+                'id' => (int) $row->id,
+                'name' => (string) $row->name,
+                'level' => (int) $row->id,
+                'category_id' => (int) $row->staff_category_id,
+            ])
+            ->all();
+    }
+
+    private function listStaffCategories(): array
+    {
+        return DB::table('staff_categories')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($row) => [
+                'id' => (int) $row->id,
+                'name' => (string) $row->name,
             ])
             ->all();
     }
@@ -1327,13 +1357,13 @@ class LegacyPortfolioService
     private function fetchProfileBundle(int $staffId): array
     {
         $staff = DB::table('staff as s')
-            ->leftJoin('academic_rank as r', 's.rank_id', '=', 'r.rank_id')
+            ->leftJoin('ranks as r', 's.rank_id', '=', 'r.id')
             ->leftJoin('department as d', 's.department_id', '=', 'd.department_id')
             ->leftJoin('college as c', 'd.college_id', '=', 'c.college_id')
             ->where('s.staff_id', $staffId)
             ->where('s.is_active', 1)
             ->selectRaw(
-                's.*, r.rank_name, d.name as department_name, c.name as college_name'
+                's.*, r.name as rank_name, d.name as department_name, c.name as college_name'
             )
             ->first();
 
@@ -1956,8 +1986,12 @@ class LegacyPortfolioService
             'staffId' => (int) $row->staff_id,
             'staffNumber' => (string) $row->staff_number,
             'name' => trim(((string) $row->first_name) . ' ' . ((string) $row->last_name)),
+            'firstName' => (string) $row->first_name,
+            'lastName' => (string) $row->last_name,
             'email' => (string) $row->email,
+            'departmentId' => (int) ($row->department_id ?? 0),
             'departmentName' => (string) ($row->department_name ?? ''),
+            'rankId' => (int) ($row->rank_id ?? 0),
             'rankName' => (string) ($row->rank_name ?? ''),
             'userId' => $hasAccount ? (int) $row->account_user_id : null,
             'username' => $hasAccount ? (string) ($row->username ?? '') : '',
@@ -1972,7 +2006,7 @@ class LegacyPortfolioService
     {
         $row = DB::table('staff as s')
             ->leftJoin('department as d', 's.department_id', '=', 'd.department_id')
-            ->leftJoin('academic_rank as r', 's.rank_id', '=', 'r.rank_id')
+            ->leftJoin('ranks as r', 's.rank_id', '=', 'r.id')
             ->leftJoin('user_account as ua', 's.staff_id', '=', 'ua.staff_id')
             ->select(
                 's.staff_id',
@@ -1980,8 +2014,10 @@ class LegacyPortfolioService
                 's.first_name',
                 's.last_name',
                 's.email',
+                's.department_id',
+                's.rank_id',
                 'd.name as department_name',
-                'r.rank_name',
+                'r.name as rank_name',
                 'ua.user_id as account_user_id',
                 'ua.username',
                 'ua.role',
@@ -2243,7 +2279,7 @@ class LegacyPortfolioService
         }
 
         if ($key === 'rank_id') {
-            $name = DB::table('academic_rank')->where('rank_id', (int) $value)->value('rank_name');
+            $name = DB::table('ranks')->where('id', (int) $value)->value('name');
 
             return (string) ($name ?: $value);
         }

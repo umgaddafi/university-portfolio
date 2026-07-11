@@ -3,6 +3,7 @@ import { AdminPageHeader, Field } from '../../components/common/ui';
 import { usePendingAction } from '../../hooks/usePendingAction';
 import { AdminRequestsWorkspace } from './AdminRequestsWorkspace';
 import { formatDateTime } from '../../utils/formatters';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 function AdminVerificationQueueSection({ summary, reloadPortal, showFlash }) {
     return (
@@ -30,6 +31,7 @@ function AdminAccountsRolesSection({
     const [filters, setFilters] = useState({ search: '', role: '', departmentId: '' });
     const [roleDrafts, setRoleDrafts] = useState({});
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
 
     useEffect(() => {
         setRoleDrafts(buildRoleDrafts(staff.items));
@@ -74,19 +76,23 @@ function AdminAccountsRolesSection({
         const isCreating = !item.hasAccount;
         const actionLabel = isCreating ? 'create a linked account' : `set the role to ${nextRole}`;
 
-        if (!window.confirm(`Are you sure you want to ${actionLabel} for ${item.name}?`)) {
-            return;
-        }
-
-        await runPending(actionKey, () => onAssignRole(item.staffId, nextRole));
+        await confirm({
+            title: 'Confirm Role Update',
+            message: `Are you sure you want to ${actionLabel} for ${item.name}?`,
+            confirmText: 'Confirm',
+            danger: false,
+            action: () => runPending(actionKey, () => onAssignRole(item.staffId, nextRole))
+        });
     }
 
     async function deactivateAccount(item) {
-        if (!window.confirm(`Deactivate ${item.name}'s account? They will not be able to sign in until reactivated.`)) {
-            return;
-        }
-
-        await runPending(`deactivate-${item.staffId}`, () => onDeactivate(item.staffId));
+        await confirm({
+            title: 'Deactivate Account',
+            message: `Deactivate ${item.name}'s account? They will not be able to sign in until reactivated.`,
+            confirmText: 'Deactivate',
+            danger: true,
+            action: () => runPending(`deactivate-${item.staffId}`, () => onDeactivate(item.staffId))
+        });
     }
 
     async function reactivateAccount(item) {
@@ -94,27 +100,33 @@ function AdminAccountsRolesSection({
     }
 
     async function forcePasswordReset(item) {
-        if (!window.confirm(`Require ${item.name} to change password on their next login?`)) {
-            return;
-        }
-
-        await runPending(`force-reset-${item.staffId}`, () => onForcePasswordReset(item.staffId));
+        await confirm({
+            title: 'Force Password Reset',
+            message: `Require ${item.name} to change password on their next login?`,
+            confirmText: 'Force Reset',
+            danger: false,
+            action: () => runPending(`force-reset-${item.staffId}`, () => onForcePasswordReset(item.staffId))
+        });
     }
 
     async function resendInvite(item) {
-        if (!window.confirm(`Resend invite for ${item.name}? This will refresh their password and send new credentials.`)) {
-            return;
-        }
-
-        await runPending(`resend-invite-${item.staffId}`, () => onResendInvite(item.staffId));
+        await confirm({
+            title: 'Resend Invite',
+            message: `Resend invite for ${item.name}? This will refresh their password and send new credentials.`,
+            confirmText: 'Resend Invite',
+            danger: false,
+            action: () => runPending(`resend-invite-${item.staffId}`, () => onResendInvite(item.staffId))
+        });
     }
 
     async function unlockAccount(item) {
-        if (!window.confirm(`Unlock ${item.name}'s account and require a password update on next login?`)) {
-            return;
-        }
-
-        await runPending(`unlock-${item.staffId}`, () => onUnlock(item.staffId));
+        await confirm({
+            title: 'Unlock Account',
+            message: `Unlock ${item.name}'s account and require a password update on next login?`,
+            confirmText: 'Unlock',
+            danger: false,
+            action: () => runPending(`unlock-${item.staffId}`, () => onUnlock(item.staffId))
+        });
     }
 
     return (

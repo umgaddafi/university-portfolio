@@ -5,6 +5,13 @@ import { Field } from '../../components/common/ui';
 import { usePendingAction } from '../../hooks/usePendingAction';
 import { formatDateTime } from '../../utils/formatters';
 import { StaffPageHeader } from './StaffShared';
+import { StaffIdCardFrontPreview } from '../../components/StaffIdCardFrontPreview';
+import { PhotoStep } from '../../components/wizard/PhotoStep';
+import { SignatureStep } from '../../components/wizard/SignatureStep';
+import { ReprintRequestStep } from '../../components/wizard/ReprintRequestStep';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
+import { useFaceDetector } from '../../utils/mediapipeFace';
 
 function SettingsSection({ staff, user, notifications, onChangePassword, onMarkAllNotificationsRead, onDownloadCv }) {
     const [form, setForm] = useState({ new_password: '', new_password_confirmation: '' });
@@ -145,19 +152,154 @@ function SettingsSection({ staff, user, notifications, onChangePassword, onMarkA
 }
 
 function IdCardSection({ staff, idCard, onRequestCard }) {
-    const [form, setForm] = useState({ request_type: 'Replacement', reason: '' });
-    const { isPending, runPending } = usePendingAction();
-    const latestRequest = idCard?.latestRequest || null;
-    const recentRequests = idCard?.recentRequests || [];
-    const displayName = staff?.full_name || [staff?.title, staff?.first_name, staff?.last_name].filter(Boolean).join(' ') || 'Staff Member';
-    const isSubmitting = isPending('request-id-card');
+    const [apiData, setApiData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [activeTab, setActiveTab] = useState('preview');
+    const [activeUpload, setActiveUpload] = useState(null);
+    const [savingPassport, setSavingPassport] = useState(false);
+    const [savingSignature, setSavingSignature] = useState(false);
+    
+    const { detectorRef, loading: detectorLoading, error: detectorError, retry: detectorRetry } = useFaceDetector();
+    
+    const [enrollmentData, setEnrollmentData] = useState({
+        photoProcessed: '',
+        signatureProcessed: ''
+    });
 
-    async function submit(event) {
-        event.preventDefault();
-        const result = await runPending('request-id-card', () => onRequestCard(form));
+    useEffect(() => {
+        if (!staff?.staff_number) {
+            setLoading(false);
+            return;
+        }
+        
+        let pfNumber = staff.staff_number;
+        // The API route requires pfNumber, but it might contain a slash which might not be safely encoded in some routers.
+        
+        fetch(`/jostum-api/v1/staff/${pfNumber}`)
+            .then(res => {
+                if (!res.ok) throw new Error('API Request Failed');
+                return res.json();
+            })
+            .then(data => {
+                if (data?.data) {
+                    setApiData(data.data);
+                    setEnrollmentData({
+                        photoProcessed: data.data.passport_url || '',
+                        signatureProcessed: data.data.signature_url || ''
+                    });
+                } else {
+                    throw new Error('Staff not found in ID card registry');
+                }
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setError(err.message || 'Failed to fetch staff data');
+                setLoading(false);
+            });
+    }, [staff?.staff_number]);
 
-        if (result?.ok) {
-            setForm({ request_type: 'Replacement', reason: '' });
+    if (loading) {
+        return <div className="staff-loading">Loading ID Card details...</div>;
+    }
+    
+    if (error) {
+        return <div className="staff-error p-6 text-red-600 bg-red-50 rounded">Error loading ID Card: {error}</div>;
+    }
+
+    const previewData = {
+        fileNo: apiData?.pf_number || '',
+        pfNumber: apiData?.pf_number || '',
+        firstName: apiData?.first_name || '',
+        lastName: apiData?.last_name || '',
+        otherName: apiData?.other_name || '',
+        department: apiData?.department || '',
+        rank: apiData?.rank || '',
+        category: apiData?.category || '',
+        photoProcessed: enrollmentData.photoProcessed || apiData?.passport_url || '',
+        signatureProcessed: enrollmentData.signatureProcessed || apiData?.signature_url || ''
+    };
+
+    async function handleUpdatePassport() {
+        if (!apiData?.pf_number) return;
+        try {
+            setSavingPassport(true);
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+
+            if (enrollmentData.photoProcessed?.startsWith('data:')) {
+                const res = await fetch(enrollmentData.photoProcessed);
+                const blob = await res.blob();
+                formData.append('passport', blob, 'passport.jpg');
+            } else {
+                toast.error("Please process a passport image first.");
+                return;
+            }
+
+            const response = await fetch(`/jostum-api/v1/staff/${apiData.pf_number}`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error('Failed to update API records');
+            
+            const responseData = await response.json();
+            if (responseData?.data) {
+                setApiData(responseData.data);
+                setEnrollmentData(prev => ({
+                    ...prev,
+                    photoProcessed: responseData.data.passport_url || ''
+                }));
+                setActiveUpload(null);
+                toast.success("Passport updated successfully on server!");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error saving passport to server");
+        } finally {
+            setSavingPassport(false);
+        }
+    }
+
+    async function handleUpdateSignature() {
+        if (!apiData?.pf_number) return;
+        try {
+            setSavingSignature(true);
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+
+            if (enrollmentData.signatureProcessed?.startsWith('data:')) {
+                const res = await fetch(enrollmentData.signatureProcessed);
+                const blob = await res.blob();
+                formData.append('signature', blob, 'signature.png');
+            } else {
+                toast.error("Please process a signature image first.");
+                return;
+            }
+
+            const response = await fetch(`/jostum-api/v1/staff/${apiData.pf_number}`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error('Failed to update API records');
+            
+            const responseData = await response.json();
+            if (responseData?.data) {
+                setApiData(responseData.data);
+                setEnrollmentData(prev => ({
+                    ...prev,
+                    signatureProcessed: responseData.data.signature_url || ''
+                }));
+                setActiveUpload(null);
+                toast.success("Signature updated successfully on server!");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error saving signature to server");
+        } finally {
+            setSavingSignature(false);
         }
     }
 
@@ -167,123 +309,83 @@ function IdCardSection({ staff, idCard, onRequestCard }) {
                 title="ID Card"
                 copy="Preview your profile-based staff card and request a fresh print when needed."
             />
-            <div className="staff-id-layout">
-                <section className="staff-id-preview-shell">
-                    <div className="staff-id-preview-note">Live sample generated from your current profile data.</div>
-                    <div className="staff-id-card">
-                        <div className="staff-id-card-head">
-                            <div className="staff-id-brand">
-                                <strong>JOSEPH SARWUAN TARKA UNIVERSITY</strong>
-                                <span>Official Staff Identity Card</span>
-                            </div>
-                            <span className="staff-id-chip">STAFF</span>
-                        </div>
-                        <div className="staff-id-card-body">
-                            <Avatar name={displayName} photoUrl={staff?.profile_photo_url} className="staff-id-avatar" />
-                            <div className="staff-id-card-copy">
-                                <h3>{displayName}</h3>
-                                <p>{staff?.rank_name || 'Academic Staff'}</p>
-                                <div className="staff-id-card-meta">
-                                    <div>
-                                        <span>Staff No</span>
-                                        <strong>{staff?.staff_number || 'Pending'}</strong>
-                                    </div>
-                                    <div>
-                                        <span>Department</span>
-                                        <strong>{staff?.department_name || 'Not set'}</strong>
-                                    </div>
-                                    <div>
-                                        <span>Email</span>
-                                        <strong>{staff?.email || 'Not available'}</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="staff-id-card-foot">
-                            <span>{staff?.college_name || 'College not set'}</span>
-                            <span>{staff?.phone || 'Update your phone in profile'}</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="staff-id-request-card">
-                    <div className="staff-form-section-head">
-                        <h3>Request New Card</h3>
-                        <p>Submit a new issue, replacement, correction, or renewal request.</p>
-                    </div>
-                    <form className="staff-settings-form" onSubmit={submit}>
-                        <Field label="Request Type">
-                            <select
-                                className="select"
-                                value={form.request_type}
-                                onChange={(event) => setForm((current) => ({ ...current, request_type: event.target.value }))}
-                                required
-                            >
-                                <option value="New Card">New Card</option>
-                                <option value="Replacement">Replacement</option>
-                                <option value="Correction">Correction</option>
-                                <option value="Renewal">Renewal</option>
-                            </select>
-                        </Field>
-                        <Field label="Reason / Notes">
-                            <textarea
-                                className="textarea"
-                                rows={5}
-                                value={form.reason}
-                                onChange={(event) => setForm((current) => ({ ...current, reason: event.target.value }))}
-                                placeholder="Explain why you need a fresh card."
-                                required
-                            />
-                        </Field>
-                        <button type="submit" className="staff-button staff-button-primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Submitting Request...' : 'Submit Request'}
-                        </button>
-                    </form>
-
-                    <div className="staff-id-status-box">
-                        <strong>Latest Request</strong>
-                        {latestRequest ? (
-                            <>
-                                <div className="staff-id-status-head">
-                                    <span>{latestRequest.requestType}</span>
-                                    <span className={`staff-status-pill is-${String(latestRequest.status || '').toLowerCase()}`}>{latestRequest.status}</span>
-                                </div>
-                                <p>{latestRequest.reason}</p>
-                                <small>Submitted {formatDateTime(latestRequest.requestedAt)}</small>
-                                {latestRequest.adminComment ? <small>Admin note: {latestRequest.adminComment}</small> : null}
-                            </>
-                        ) : (
-                            <p>No ID card requests submitted yet.</p>
-                        )}
-                    </div>
-                </section>
+            <div className="border-b border-slate-200 mb-6 flex gap-6 px-2">
+                <button 
+                    className={`pb-3 px-1 font-medium text-sm border-b-2 transition-colors ${activeTab === 'preview' ? 'border-cyan-700 text-cyan-800' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                    onClick={() => { setActiveTab('preview'); setActiveUpload(null); }}
+                >
+                    ID Card Preview
+                </button>
+                <button 
+                    className={`pb-3 px-1 font-medium text-sm border-b-2 transition-colors ${activeTab === 'reprint' ? 'border-cyan-700 text-cyan-800' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                    onClick={() => { setActiveTab('reprint'); setActiveUpload(null); }}
+                >
+                    Request Renewal (Reprint)
+                </button>
             </div>
 
-            <section className="staff-id-history-card">
-                <div className="staff-form-section-head">
-                    <h3>Recent Card Requests</h3>
-                    <p>Your latest submissions and their current status.</p>
-                </div>
-                {recentRequests.length === 0 ? (
-                    <div className="staff-empty-inline">No card request history yet.</div>
-                ) : (
-                    <div className="staff-id-request-list">
-                        {recentRequests.map((request) => (
-                            <article className="staff-id-request-item" key={request.requestId}>
-                                <div>
-                                    <strong>{request.requestType}</strong>
-                                    <p>{request.reason}</p>
-                                    <small>{formatDateTime(request.requestedAt)}</small>
-                                </div>
-                                <div className="staff-id-request-side">
-                                    <span className={`staff-status-pill is-${String(request.status || '').toLowerCase()}`}>{request.status}</span>
-                                    {request.adminComment ? <small>{request.adminComment}</small> : null}
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+            <div className="staff-id-layout">
+                {activeTab === 'preview' && (
+                    <section className="staff-id-preview-shell bg-slate-50 p-6 rounded-xl border border-slate-200">
+                        <div className="staff-id-preview-note mb-6 text-center text-slate-600">Live sample generated from your current profile data.</div>
+                        
+                        <StaffIdCardFrontPreview data={previewData} size="compact" />
+                        
+                        <div className="mt-8 flex flex-col items-center sm:flex-row flex-wrap justify-center gap-3 w-full max-w-sm mx-auto sm:max-w-none">
+                            <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row">
+                                <button 
+                                    className="staff-button staff-button-primary w-full sm:w-auto text-xs sm:text-sm px-1 sm:px-4 whitespace-nowrap"
+                                    onClick={() => setActiveUpload(activeUpload === 'passport' ? null : 'passport')}
+                                >
+                                    {activeUpload === 'passport' ? 'Close Passport' : 'Change Passport'}
+                                </button>
+                                <button 
+                                    className="staff-button staff-button-primary w-full sm:w-auto text-xs sm:text-sm px-1 sm:px-4 whitespace-nowrap"
+                                    onClick={() => setActiveUpload(activeUpload === 'signature' ? null : 'signature')}
+                                >
+                                    {activeUpload === 'signature' ? 'Close Signature' : 'Change Signature'}
+                                </button>
+                            </div>
+                        </div>
+                    </section>
                 )}
-            </section>
+                
+                {activeTab === 'preview' && activeUpload && (
+                    <section className="staff-id-request-card space-y-8">
+                        {activeUpload === 'passport' && (
+                            <div>
+                                <PhotoStep 
+                                    data={enrollmentData} 
+                                    onChange={setEnrollmentData} 
+                                    onNext={handleUpdatePassport} 
+                                    nextLabel="Save Passport"
+                                    isNextLoading={savingPassport}
+                                    detector={detectorRef} 
+                                    detectorLoading={detectorLoading} 
+                                    detectorError={detectorError} 
+                                    onRetry={detectorRetry} 
+                                    passportUploadFirst={true} 
+                                />
+                            </div>
+                        )}
+                        {activeUpload === 'signature' && (
+                            <div>
+                                <SignatureStep 
+                                    data={enrollmentData} 
+                                    onChange={setEnrollmentData} 
+                                    onNext={handleUpdateSignature}
+                                    nextLabel="Save Signature"
+                                    isNextLoading={savingSignature}
+                                />
+                            </div>
+                        )}
+                    </section>
+                )}
+
+                {activeTab === 'reprint' && (
+                    <ReprintRequestStep staffData={apiData} />
+                )}
+            </div>
         </>
     );
 }

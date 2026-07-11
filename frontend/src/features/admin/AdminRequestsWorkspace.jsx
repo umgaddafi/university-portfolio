@@ -4,6 +4,8 @@ import { AdminModal, AdminPageHeader, Field } from '../../components/common/ui';
 import { usePendingAction } from '../../hooks/usePendingAction';
 import { api } from '../../lib/api';
 import { formatDateTime, getErrorMessage } from '../../utils/formatters';
+import { PortalNavIcon } from '../../components/icons/AppIcons';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 const REQUEST_TABS = [
     { key: 'pending', label: 'Pending' },
@@ -35,6 +37,7 @@ function AdminRequestsWorkspace({
     const [selectedLogId, setSelectedLogId] = useState(null);
     const [rejectionState, setRejectionState] = useState({ open: false, logId: null, reason: '' });
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
 
     const filteredSummary = filterRequestQueue(summary, search, queueMode);
     const selectedStaff = filteredSummary.find((item) => item.staffId === selectedStaffId) || null;
@@ -149,19 +152,58 @@ function AdminRequestsWorkspace({
         await submitDecision(rejectionState.logId, 'reject', rejectionState.reason);
     }
 
+    async function submitApproveAll() {
+        await confirm({
+            title: 'Approve All Requests',
+            message: 'Are you sure you want to approve ALL pending requests? This will apply all pending changes to the database.',
+            confirmText: 'Approve All',
+            danger: false,
+            action: async () => {
+                try {
+                    const result = await api('/api/admin/requests/approve-all', {
+                        method: 'POST',
+                    });
+
+                    showFlash(result.message || 'All pending requests approved.');
+                    await reloadPortal();
+                    if (selectedStaffId) {
+                        await loadHistory(selectedStaffId);
+                    }
+
+                    return { ok: true, result };
+                } catch (error) {
+                    showFlash(getErrorMessage(error), 'error');
+                    return { ok: false, error };
+                }
+            }
+        });
+    }
+
+    const statCards = [
+        { key: 'pending', label: 'Pending Requests', value: workspaceStats.pending, icon: 'requests', tone: 'warning' },
+        { key: 'staff', label: 'Staff in Queue', value: workspaceStats.staff, icon: 'staff', tone: 'success' },
+        { key: 'total', label: 'Total Requests', value: workspaceStats.total, icon: 'documents', tone: 'primary' },
+    ];
+
     return (
         <>
             <AdminPageHeader
                 title={title}
                 subtitle={subtitle}
-                meta={(
-                    <div className="admin-request-stats">
-                        <span className="admin-badge is-pending">{workspaceStats.pending} pending</span>
-                        <span className="admin-badge is-primary">{workspaceStats.staff} staff in queue</span>
-                        <span className="admin-badge is-neutral">{workspaceStats.total} total requests</span>
-                    </div>
-                )}
             />
+            <div className="admin-dashboard-stats">
+                {statCards.map((item) => (
+                    <div className={`admin-dashboard-stat is-${item.tone}`} key={item.key}>
+                        <div>
+                            <h3>{item.label}</h3>
+                            <strong>{item.value}</strong>
+                        </div>
+                        <span className="admin-dashboard-stat-icon" aria-hidden="true">
+                            <PortalNavIcon name={item.icon} />
+                        </span>
+                    </div>
+                ))}
+            </div>
             <section className="admin-request-toolbar card">
                 <div className="admin-request-toolbar-grid">
                     <Field label="Search Staff Name / PF Number">
@@ -192,11 +234,22 @@ function AdminRequestsWorkspace({
             </section>
             <section className="admin-request-workspace">
                 <aside className="admin-request-queue card">
-                    <div className="admin-request-section-head">
+                    <div className="admin-request-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div className="admin-request-section-copy">
                             <h3>Request Queue</h3>
                             <p>{filteredSummary.length} staff record{filteredSummary.length === 1 ? '' : 's'} in view</p>
                         </div>
+                        {workspaceStats.pending > 0 && (
+                            <button
+                                type="button"
+                                className="admin-button admin-button-primary"
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                onClick={submitApproveAll}
+                                disabled={isPending('approve-all')}
+                            >
+                                {isPending('approve-all') ? 'Approving...' : 'Approve All'}
+                            </button>
+                        )}
                     </div>
                     {filteredSummary.length === 0 ? (
                         <div className="admin-empty-state">

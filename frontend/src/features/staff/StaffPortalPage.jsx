@@ -21,6 +21,9 @@ import {
     ResearchSection,
 } from './StaffProfileSections';
 import { HistorySection } from './StaffShared';
+import { StaffAppraisalSections } from './StaffAppraisalSections';
+import { StaffAuditSections } from './StaffAuditSections';
+import { StaffPaymentsSections } from './StaffPaymentsSections';
 
 function StaffPortalPage({ user, onLogout, showFlash }) {
     const location = useLocation();
@@ -56,6 +59,28 @@ function StaffPortalPage({ user, onLogout, showFlash }) {
             items: [
                 { to: '/staff/courses', label: 'Courses', icon: 'courses' },
                 { to: '/staff/grants', label: 'Grants', icon: 'grants' },
+            ],
+        },
+        {
+            title: 'Appraisal',
+            items: [
+                { to: '/staff/appraisal', label: 'Dashboard', icon: 'dashboard' },
+                { to: '/staff/appraisal/my-appraisals', label: 'My Appraisals', icon: 'document' },
+                { to: '/staff/appraisal/profile', label: 'My Profile', icon: 'profile' },
+            ],
+        },
+        {
+            title: 'Internal Audit',
+            items: [
+                { to: '/staff/audit', label: 'Overview', icon: 'dashboard' },
+                { to: '/staff/audit/verification', label: 'Verification', icon: 'document' },
+                { to: '/staff/audit/profile', label: 'Profile', icon: 'profile' },
+            ],
+        },
+        {
+            title: 'Payments',
+            items: [
+                { to: '/staff/payments', label: 'Payslip', icon: 'document' },
             ],
         },
         {
@@ -152,6 +177,12 @@ function StaffPortalPage({ user, onLogout, showFlash }) {
                 onRequestCard={(payload) => mutate('/api/staff/id-card/request', { method: 'POST', data: payload }, 'ID card request submitted successfully.')}
             />
         );
+    } else if (section === 'appraisal') {
+        content = <StaffAppraisalSections />;
+    } else if (section === 'audit') {
+        content = <StaffAuditSections staff={data.profile.staff} />;
+    } else if (section === 'payments') {
+        content = <StaffPaymentsSections staff={data.profile.staff} />;
     } else {
         content = <HistorySection items={data.history} />;
     }

@@ -71,6 +71,7 @@ Route::prefix('api')->group(function (): void {
         ->group(function (): void {
             Route::get('/portal', [AdminController::class, 'portal']);
             Route::post('/staff', [AdminController::class, 'createStaff']);
+            Route::put('/staff/{staffId}', [AdminController::class, 'updateStaff']);
             Route::post('/staff/{staffId}/role', [AdminController::class, 'assignStaffRole']);
             Route::post('/staff/{staffId}/deactivate', [AdminController::class, 'deactivateStaffAccount']);
             Route::post('/staff/{staffId}/reactivate', [AdminController::class, 'reactivateStaffAccount']);
@@ -92,6 +93,7 @@ Route::prefix('api')->group(function (): void {
             Route::delete('/ranks/{rankId}', [AdminController::class, 'deleteRank']);
 
             Route::get('/requests/{staffId}', [AdminController::class, 'requestHistory']);
+            Route::post('/requests/approve-all', [AdminController::class, 'approveAllRequests']);
             Route::get('/review/{logId}', [AdminController::class, 'requestDetail']);
             Route::post('/review/{logId}', [AdminController::class, 'decideRequest']);
         });

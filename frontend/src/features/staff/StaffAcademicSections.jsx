@@ -14,11 +14,13 @@ import {
     supervisionFormDefaults,
 } from './constants';
 import { StaffModal, StaffPageHeader } from './StaffShared';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 function CoursesSection({ items, courseOptions, onLink, onDelete }) {
     const [form, setForm] = useState(courseLinkDefaults);
     const [showModal, setShowModal] = useState(false);
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const sessionOptions = academicSessionOptions();
     const isSubmitting = isPending('link-course');
     const groupedCourses = items.reduce((accumulator, item) => {
@@ -69,12 +71,14 @@ function CoursesSection({ items, courseOptions, onLink, onDelete }) {
                                     <button
                                         type="button"
                                         className="staff-icon-text-button is-danger"
-                                        onClick={() => {
-                                            if (!window.confirm('Remove this course from your portfolio for this session?')) {
-                                                return;
-                                            }
-
-                                            void runPending(`delete-course-${item.course_id}-${item.session}`, () => onDelete({ course_id: item.course_id, session: item.session }));
+                                        onClick={async () => {
+                                            await confirm({
+                                                title: 'Confirm Deletion',
+                                                message: 'Remove this course from your portfolio for this session?',
+                                                confirmText: 'Remove',
+                                                danger: true,
+                                                action: () => runPending(`delete-course-${item.course_id}-${item.session}`, () => onDelete({ course_id: item.course_id, session: item.session }))
+                                            });
                                         }}
                                         disabled={isPending(`delete-course-${item.course_id}-${item.session}`)}
                                     >
@@ -131,6 +135,7 @@ function GrantsSection({ items, onCreate, onDelete }) {
     const [form, setForm] = useState(grantFormDefaults);
     const [showModal, setShowModal] = useState(false);
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const currentYear = new Date().getFullYear();
     const totalFunding = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const isSubmitting = isPending('create-grant');
@@ -178,12 +183,14 @@ function GrantsSection({ items, onCreate, onDelete }) {
                                     <button
                                         type="button"
                                         className="staff-icon-text-button is-danger"
-                                        onClick={() => {
-                                            if (!window.confirm('Remove this grant?')) {
-                                                return;
-                                            }
-
-                                            void runPending(`delete-grant-${item.project_id}`, () => onDelete(item.project_id));
+                                        onClick={async () => {
+                                            await confirm({
+                                                title: 'Confirm Deletion',
+                                                message: 'Remove this grant?',
+                                                confirmText: 'Delete',
+                                                danger: true,
+                                                action: () => runPending(`delete-grant-${item.project_id}`, () => onDelete(item.project_id))
+                                            });
                                         }}
                                         disabled={isPending(`delete-grant-${item.project_id}`)}
                                     >
@@ -235,6 +242,7 @@ function SupervisionSection({ items, onCreate, onDelete }) {
     const [form, setForm] = useState(supervisionFormDefaults);
     const [showModal, setShowModal] = useState(false);
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSubmitting = isPending('create-supervision');
 
     function openModal() {
@@ -273,12 +281,14 @@ function SupervisionSection({ items, onCreate, onDelete }) {
                                 <button
                                     type="button"
                                     className="staff-icon-text-button is-danger"
-                                    onClick={() => {
-                                        if (!window.confirm('Remove this supervision record?')) {
-                                            return;
-                                        }
-
-                                        void runPending(`delete-supervision-${item.supervision_id}`, () => onDelete(item.supervision_id));
+                                    onClick={async () => {
+                                        await confirm({
+                                            title: 'Confirm Deletion',
+                                            message: 'Remove this supervision record?',
+                                            confirmText: 'Delete',
+                                            danger: true,
+                                            action: () => runPending(`delete-supervision-${item.supervision_id}`, () => onDelete(item.supervision_id))
+                                        });
                                     }}
                                     disabled={isPending(`delete-supervision-${item.supervision_id}`)}
                                 >
@@ -341,6 +351,7 @@ function MembershipSection({ items, onCreate, onDelete }) {
     const [file, setFile] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSubmitting = isPending('create-membership');
 
     function openModal() {
@@ -377,12 +388,14 @@ function MembershipSection({ items, onCreate, onDelete }) {
                                 <button
                                     type="button"
                                     className="staff-round-icon is-danger"
-                                    onClick={() => {
-                                        if (!window.confirm('Request removal of this membership?')) {
-                                            return;
-                                        }
-
-                                        void runPending(`delete-membership-${item.membership_id}`, () => onDelete(item.membership_id));
+                                    onClick={async () => {
+                                        await confirm({
+                                            title: 'Confirm Deletion',
+                                            message: 'Request removal of this membership?',
+                                            confirmText: 'Remove',
+                                            danger: true,
+                                            action: () => runPending(`delete-membership-${item.membership_id}`, () => onDelete(item.membership_id))
+                                        });
                                     }}
                                     disabled={isPending(`delete-membership-${item.membership_id}`)}
                                 >
@@ -444,6 +457,7 @@ function ExternalProfilesSection({ items, onCreate, onDelete }) {
     const [form, setForm] = useState(externalProfileFormDefaults);
     const [showModal, setShowModal] = useState(false);
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSubmitting = isPending('create-external-profile');
 
     function openModal() {
@@ -482,12 +496,14 @@ function ExternalProfilesSection({ items, onCreate, onDelete }) {
                                 <button
                                     type="button"
                                     className="staff-round-icon is-danger"
-                                    onClick={() => {
-                                        if (!window.confirm('Remove this profile?')) {
-                                            return;
-                                        }
-
-                                        void runPending(`delete-external-profile-${item.profile_id}`, () => onDelete(item.profile_id));
+                                    onClick={async () => {
+                                        await confirm({
+                                            title: 'Confirm Deletion',
+                                            message: 'Remove this profile?',
+                                            confirmText: 'Remove',
+                                            danger: true,
+                                            action: () => runPending(`delete-external-profile-${item.profile_id}`, () => onDelete(item.profile_id))
+                                        });
                                     }}
                                     disabled={isPending(`delete-external-profile-${item.profile_id}`)}
                                 >

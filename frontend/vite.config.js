@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from 'vite';
+import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 
@@ -12,6 +13,11 @@ export default defineConfig(({ mode }) => {
 
     return {
         base: env.VITE_APP_BASE || '/',
+        resolve: {
+            alias: {
+                '@': path.resolve(__dirname, './src'),
+            },
+        },
         plugins: [
             react(),
             tailwindcss(),
@@ -22,6 +28,11 @@ export default defineConfig(({ mode }) => {
         },
         server: {
             proxy: {
+                '/jostum-api': {
+                    target: 'https://jostumservices.com',
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/jostum-api/, '/api'),
+                },
                 '/api': {
                     target: backendOrigin,
                     changeOrigin: true,

@@ -132,7 +132,7 @@ function PortalShell({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isMobileSidebarOpen, isMobileViewport]);
 
-    const isDesktopCollapsed = variant === 'default' && !isMobileViewport && isSidebarCollapsed;
+    const isDesktopCollapsed = !isMobileViewport && isSidebarCollapsed;
     const staffTopbarName = staffTopbar?.name || user.name || title;
     const adminTopbarName = adminTopbar?.name || user.name || 'Administrator';
     const resolvedStaffTopbar = variant === 'staff'
@@ -221,9 +221,6 @@ function PortalShell({
                             </button>
                         ) : null}
                         <Link className="admin-portal-topbar-brand-link" to={resolvedAdminTopbar.homeTo}>
-                            <span className="admin-portal-topbar-brand-icon" aria-hidden="true">
-                                <AdminPortalBrandIcon />
-                            </span>
                             <span className="admin-portal-topbar-brand-label">{resolvedAdminTopbar.brandLabel}</span>
                         </Link>
                     </div>
@@ -234,8 +231,8 @@ function PortalShell({
                             <ChevronDownIcon className="admin-portal-topbar-chevron" />
                         </summary>
                         <div className="admin-portal-topbar-menu-panel">
-                            <Link className="admin-portal-topbar-menu-item" to={resolvedAdminTopbar.homeTo}>Dashboard</Link>
-                            <button type="button" className="admin-portal-topbar-menu-item is-danger" onClick={onLogout}>Logout</button>
+                            <Link className="admin-portal-topbar-menu-item" to={resolvedAdminTopbar.homeTo} onClick={(e) => e.target.closest('details').removeAttribute('open')}>Dashboard</Link>
+                            <button type="button" className="admin-portal-topbar-menu-item is-danger" onClick={(e) => { e.target.closest('details').removeAttribute('open'); onLogout(); }}>Logout</button>
                         </div>
                     </details>
                 </header>
@@ -256,9 +253,6 @@ function PortalShell({
                             </button>
                         ) : null}
                         <Link className="staff-portal-topbar-brand-link" to={resolvedStaffTopbar.homeTo}>
-                            <span className="staff-portal-topbar-brand-icon" aria-hidden="true">
-                                <StaffPortalBrandIcon />
-                            </span>
                             <span className="staff-portal-topbar-brand-label">{resolvedStaffTopbar.brandLabel}</span>
                         </Link>
                     </div>
@@ -313,6 +307,7 @@ function PortalShell({
                                             <a
                                                 className="staff-portal-topbar-notification-link"
                                                 href={item.targetUrl || resolvedStaffTopbar.notificationsTo}
+                                                onClick={(e) => e.target.closest('details')?.removeAttribute('open')}
                                             >
                                                 <strong>{item.title}</strong>
                                                 {item.message ? <span>{item.message}</span> : null}
@@ -333,7 +328,7 @@ function PortalShell({
                                         <p className="staff-portal-topbar-empty">No notifications yet.</p>
                                     )}
                                 </div>
-                                <Link className="staff-portal-topbar-menu-link" to={resolvedStaffTopbar.notificationsTo}>
+                                <Link className="staff-portal-topbar-menu-link" to={resolvedStaffTopbar.notificationsTo} onClick={(e) => e.target.closest('details').removeAttribute('open')}>
                                     Open change history
                                 </Link>
                             </div>
@@ -350,9 +345,9 @@ function PortalShell({
                                 <ChevronDownIcon className="staff-portal-topbar-chevron" />
                             </summary>
                             <div className="staff-portal-topbar-menu-panel staff-portal-topbar-menu-panel-account">
-                                <Link className="staff-portal-topbar-menu-item" to={resolvedStaffTopbar.profileTo}>Profile</Link>
-                                <Link className="staff-portal-topbar-menu-item" to={resolvedStaffTopbar.settingsTo}>Settings</Link>
-                                <button type="button" className="staff-portal-topbar-menu-item is-danger" onClick={onLogout}>Sign out</button>
+                                <Link className="staff-portal-topbar-menu-item" to={resolvedStaffTopbar.profileTo} onClick={(e) => e.target.closest('details').removeAttribute('open')}>Profile</Link>
+                                <Link className="staff-portal-topbar-menu-item" to={resolvedStaffTopbar.settingsTo} onClick={(e) => e.target.closest('details').removeAttribute('open')}>Settings</Link>
+                                <button type="button" className="staff-portal-topbar-menu-item is-danger" onClick={(e) => { e.target.closest('details').removeAttribute('open'); onLogout(); }}>Sign out</button>
                             </div>
                         </details>
                     </div>
@@ -392,6 +387,58 @@ function PortalShell({
                                         return;
                                     }
 
+                                    setIsSidebarCollapsed((current) => !current);
+                                }}
+                                aria-label={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
+                                aria-pressed={isMobileViewport ? isMobileSidebarOpen : isSidebarCollapsed}
+                                title={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
+                            >
+                                {isMobileViewport ? <MenuToggleIcon open={isMobileSidebarOpen} /> : <SidebarToggleIcon collapsed={isSidebarCollapsed} />}
+                            </button>
+                        </div>
+                    ) : null}
+                    {variant === 'admin' && resolvedAdminTopbar ? (
+                        <div className="portal-sidebar-brand">
+                            <Link className="admin-portal-topbar-brand-link" to={resolvedAdminTopbar.homeTo}>
+                                <AdminPortalBrandIcon className="admin-portal-topbar-brand-icon" />
+                                {!isDesktopCollapsed ? (
+                                    <span className="admin-portal-topbar-brand-label">{resolvedAdminTopbar.brandLabel}</span>
+                                ) : null}
+                            </Link>
+                            <button
+                                type="button"
+                                className="portal-sidebar-toggle"
+                                onClick={() => {
+                                    if (isMobileViewport) {
+                                        setIsMobileSidebarOpen(false);
+                                        return;
+                                    }
+                                    setIsSidebarCollapsed((current) => !current);
+                                }}
+                                aria-label={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
+                                aria-pressed={isMobileViewport ? isMobileSidebarOpen : isSidebarCollapsed}
+                                title={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}
+                            >
+                                {isMobileViewport ? <MenuToggleIcon open={isMobileSidebarOpen} /> : <SidebarToggleIcon collapsed={isSidebarCollapsed} />}
+                            </button>
+                        </div>
+                    ) : null}
+                    {variant === 'staff' && resolvedStaffTopbar ? (
+                        <div className="portal-sidebar-brand">
+                            <Link className="staff-portal-topbar-brand-link" to={resolvedStaffTopbar.homeTo}>
+                                <StaffPortalBrandIcon className="staff-portal-topbar-brand-icon" />
+                                {!isDesktopCollapsed ? (
+                                    <span className="staff-portal-topbar-brand-label">{resolvedStaffTopbar.brandLabel}</span>
+                                ) : null}
+                            </Link>
+                            <button
+                                type="button"
+                                className="portal-sidebar-toggle"
+                                onClick={() => {
+                                    if (isMobileViewport) {
+                                        setIsMobileSidebarOpen(false);
+                                        return;
+                                    }
                                     setIsSidebarCollapsed((current) => !current);
                                 }}
                                 aria-label={isMobileViewport ? 'Close sidebar' : (isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')}

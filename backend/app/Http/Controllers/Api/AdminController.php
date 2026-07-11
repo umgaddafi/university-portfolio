@@ -34,7 +34,21 @@ class AdminController extends Controller
             $service->createStaffAccount($payload)
         );
     }
+    public function updateStaff(Request $request, int $staffId, LegacyPortfolioService $service): JsonResponse
+    {
+        $payload = $request->validate([
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150'],
+            'staff_number' => ['required', 'string', 'max:50'],
+            'department_id' => ['required', 'integer'],
+            'rank_id' => ['required', 'integer'],
+        ]);
 
+        return response()->json(
+            $service->updateStaffAccount($staffId, $payload)
+        );
+    }
     public function assignStaffRole(Request $request, int $staffId, LegacyPortfolioService $service): JsonResponse
     {
         $payload = $request->validate([
@@ -179,6 +193,17 @@ class AdminController extends Controller
         return response()->json(
             $service->requestHistory($staffId)
         );
+    }
+
+    public function approveAllRequests(Request $request, LegacyPortfolioService $service): JsonResponse
+    {
+        $service->approveAllRequests(
+            (int) $request->session()->get('legacy_auth.userId', 0)
+        );
+
+        return response()->json([
+            'message' => 'All pending requests approved successfully.',
+        ]);
     }
 
     public function requestDetail(int $logId, LegacyPortfolioService $service): JsonResponse

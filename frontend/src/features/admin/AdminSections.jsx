@@ -5,6 +5,7 @@ import { PortalNavIcon } from '../../components/icons/AppIcons';
 import { usePendingAction } from '../../hooks/usePendingAction';
 import { formatDateTime } from '../../utils/formatters';
 import { AdminRequestsWorkspace } from './AdminRequestsWorkspace';
+import { useConfirm } from '../../contexts/ConfirmContext';
 
 function AdminDashboardSection({ dashboard }) {
     const today = new Date().toLocaleDateString(undefined, { month: 'long', day: '2-digit', year: 'numeric' });
@@ -75,14 +76,21 @@ function AdminDashboardSection({ dashboard }) {
     );
 }
 
-function AdminStaffSection({ staff, onCreate, onDelete }) {
+function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
     const [filters, setFilters] = useState({ search: '', departmentId: '', rankId: '', role: '' });
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [form, setForm] = useState({ first_name: '', last_name: '', email: '', staff_number: '', department_id: '', rank_id: '' });
+    const [editingStaffId, setEditingStaffId] = useState(null);
+    const [form, setForm] = useState({ first_name: '', last_name: '', email: '', staff_number: '', department_id: '', rank_id: '', staff_category_id: '', passport_url: '' });
+    const [isSearchingStaff, setIsSearchingStaff] = useState(false);
+    const [searchError, setSearchError] = useState('');
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const selectedDepartment = staff.filters.departments.find((item) => String(item.id) === String(filters.departmentId));
     const selectedRank = staff.filters.ranks.find((item) => String(item.id) === String(filters.rankId));
     const isCreating = isPending('create-staff');
+    const isUpdating = editingStaffId ? isPending(`update-staff-${editingStaffId}`) : false;
+    const isSaving = isCreating || isUpdating;
+
     const filteredStaff = staff.items.filter((item) => {
         const searchValue = filters.search.trim().toLowerCase();
         const roleValue = item.role || 'NULL';
@@ -106,12 +114,91 @@ function AdminStaffSection({ staff, onCreate, onDelete }) {
         return true;
     });
 
+    function openEditModal(item) {
+        const matchedRank = staff.filters.ranks.find(r => r.id === item.rankId);
+        setForm({
+            first_name: item.firstName || '',
+            last_name: item.lastName || '',
+            email: item.email || '',
+            staff_number: item.staffNumber || '',
+            department_id: item.departmentId || '',
+            rank_id: item.rankId || '',
+            staff_category_id: matchedRank ? matchedRank.category_id : '',
+            passport_url: item.profilePhotoUrl || '',
+        });
+        setEditingStaffId(item.staffId);
+        setShowCreateModal(true);
+    }
+
+    function closeCreateModal() {
+        setForm({ first_name: '', last_name: '', email: '', staff_number: '', department_id: '', rank_id: '', staff_category_id: '', passport_url: '' });
+        setEditingStaffId(null);
+        setShowCreateModal(false);
+    }
+
     async function submitCreate(event) {
         event.preventDefault();
-        const result = await runPending('create-staff', () => onCreate(form));
+        
+        let result;
+        if (editingStaffId) {
+            result = await runPending(`update-staff-${editingStaffId}`, () => onUpdate(editingStaffId, form));
+        } else {
+            result = await runPending('create-staff', () => onCreate(form));
+        }
+
         if (result?.ok) {
-            setForm({ first_name: '', last_name: '', email: '', staff_number: '', department_id: '', rank_id: '' });
-            setShowCreateModal(false);
+            closeCreateModal();
+        }
+    }
+
+    async function handleSearchStaff() {
+        if (!form.staff_number) return;
+        
+        setIsSearchingStaff(true);
+        setSearchError('');
+        
+        try {
+            const response = await fetch(`/jostum-api/v1/staff/${form.staff_number}`);
+            
+            if (!response.ok) {
+                throw new Error('Staff not found or API error.');
+            }
+            
+            const result = await response.json();
+            if (result && result.data) {
+                let matchedDepartmentId = '';
+                if (result.data.department) {
+                    const matchedDept = staff.filters.departments.find(d => d.name.toLowerCase() === result.data.department.toLowerCase());
+                    if (matchedDept) matchedDepartmentId = matchedDept.id;
+                }
+
+                let matchedRankId = '';
+                let matchedRank = null;
+                if (result.data.rank) {
+                    matchedRank = staff.filters.ranks.find(r => r.name.toLowerCase() === result.data.rank.toLowerCase());
+                    if (matchedRank) matchedRankId = matchedRank.id;
+                }
+
+                let matchedCategoryId = '';
+                if (matchedRank) matchedCategoryId = matchedRank.category_id;
+
+                setForm(current => ({
+                    ...current,
+                    first_name: result.data.first_name || '',
+                    last_name: result.data.last_name || '',
+                    email: result.data.email || current.email,
+                    department_id: matchedDepartmentId || current.department_id,
+                    rank_id: matchedRankId || current.rank_id,
+                    staff_category_id: matchedCategoryId || current.staff_category_id,
+                    passport_url: result.data.passport_url || current.passport_url,
+                }));
+            } else {
+                throw new Error('Invalid data format received.');
+            }
+        } catch (error) {
+            setSearchError(error.message || 'Failed to fetch staff details.');
+        } finally {
+            setIsSearchingStaff(false);
         }
     }
 
@@ -120,7 +207,7 @@ function AdminStaffSection({ staff, onCreate, onDelete }) {
             <AdminPageHeader
                 title="Staff Directory"
                 action={(
-                    <button type="button" className="admin-button admin-button-primary" onClick={() => setShowCreateModal(true)}>
+                    <button type="button" className="admin-button admin-button-primary" onClick={() => { setEditingStaffId(null); setShowCreateModal(true); }}>
                         Add New Staff
                     </button>
                 )}
@@ -211,16 +298,26 @@ function AdminStaffSection({ staff, onCreate, onDelete }) {
                                     <td>{item.role || 'No Account'}</td>
                                     <td>{item.rankName || 'N/A'}</td>
                                     <td>{item.departmentName || 'N/A'}</td>
-                                    <td className="is-right">
+                                    <td className="is-right" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                        <button
+                                            type="button"
+                                            className="admin-button-secondary"
+                                            style={{ padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}
+                                            onClick={() => openEditModal(item)}
+                                        >
+                                            Edit
+                                        </button>
                                         <button
                                             type="button"
                                             className="admin-table-danger"
-                                            onClick={() => {
-                                                if (!window.confirm(`Delete ${item.name}?`)) {
-                                                    return;
-                                                }
-
-                                                void runPending(`delete-staff-${item.staffId}`, () => onDelete(item.staffId));
+                                            onClick={async () => {
+                                                await confirm({
+                                                    title: 'Confirm Deletion',
+                                                    message: `Delete ${item.name}? This action cannot be undone.`,
+                                                    confirmText: 'Delete',
+                                                    danger: true,
+                                                    action: () => runPending(`delete-staff-${item.staffId}`, () => onDelete(item.staffId))
+                                                });
                                             }}
                                             disabled={isPending(`delete-staff-${item.staffId}`)}
                                         >
@@ -235,24 +332,76 @@ function AdminStaffSection({ staff, onCreate, onDelete }) {
             </section>
             <AdminModal
                 open={showCreateModal}
-                title="Add New Staff"
-                onClose={() => setShowCreateModal(false)}
+                title={editingStaffId ? "Edit Staff" : "Add New Staff"}
+                onClose={closeCreateModal}
                 actions={(
                     <>
-                        <button type="button" className="admin-button admin-button-secondary" onClick={() => setShowCreateModal(false)} disabled={isCreating}>Cancel</button>
-                        <button type="submit" form="admin-staff-create-form" className="admin-button admin-button-primary" disabled={isCreating}>
-                            {isCreating ? 'Creating...' : 'Create Account'}
+                        <button type="button" className="admin-button admin-button-secondary" onClick={closeCreateModal} disabled={isSaving}>Cancel</button>
+                        <button type="submit" form="admin-staff-create-form" className="admin-button admin-button-primary" disabled={isSaving || isSearchingStaff}>
+                            {isSaving ? 'Saving...' : (editingStaffId ? 'Update Account' : 'Create Account')}
                         </button>
                     </>
                 )}
             >
                 <form id="admin-staff-create-form" className="admin-modal-form" onSubmit={submitCreate}>
+                    {searchError && <div className="admin-form-error" style={{ color: 'var(--color-danger)', fontSize: '0.85rem', marginBottom: '1rem' }}>{searchError}</div>}
+                    <Field label="Staff Number (Search to auto-fill)">
+                        <div style={{ position: 'relative', display: 'flex' }}>
+                            <input 
+                                className="input" 
+                                value={form.staff_number} 
+                                onChange={(event) => setForm((current) => ({ ...current, staff_number: event.target.value }))} 
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        handleSearchStaff();
+                                    }
+                                }}
+                                required 
+                                style={{ paddingRight: '3rem' }}
+                            />
+                            <button
+                                type="button"
+                                className="admin-icon-button"
+                                onClick={handleSearchStaff}
+                                disabled={isSearchingStaff || !form.staff_number}
+                                style={{ position: 'absolute', right: '0.25rem', top: '50%', transform: 'translateY(-50%)', padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                aria-label="Search staff details"
+                                title="Search staff details"
+                            >
+                                {isSearchingStaff ? (
+                                    <span style={{ fontSize: '0.8rem' }}>...</span>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
+                    </Field>
+                    
+                    {form.passport_url && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                            <img src={form.passport_url} alt="Staff Passport" style={{ width: '100px', height: '100px', objectFit: 'fill', borderRadius: '8px', border: '2px solid var(--border-light)' }} />
+                        </div>
+                    )}
+                    
                     <div className="admin-modal-grid">
                         <Field label="First name"><input className="input" value={form.first_name} onChange={(event) => setForm((current) => ({ ...current, first_name: event.target.value }))} required /></Field>
                         <Field label="Last name"><input className="input" value={form.last_name} onChange={(event) => setForm((current) => ({ ...current, last_name: event.target.value }))} required /></Field>
                     </div>
-                    <Field label="Email"><input className="input" type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} required /></Field>
-                    <Field label="Staff number"><input className="input" value={form.staff_number} onChange={(event) => setForm((current) => ({ ...current, staff_number: event.target.value }))} required /></Field>
+                    <div className="admin-modal-grid">
+                        <Field label="Email"><input className="input" type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} required /></Field>
+                        <Field label="Staff Category">
+                            <select className="select" value={form.staff_category_id} onChange={(event) => setForm((current) => ({ ...current, staff_category_id: event.target.value, rank_id: '' }))}>
+                                <option value="">Select category</option>
+                                {staff.filters.categories?.map((category) => (
+                                    <option key={category.id} value={category.id}>{category.name}</option>
+                                ))}
+                            </select>
+                        </Field>
+                    </div>
                     <div className="admin-modal-grid">
                         <Field label="Department">
                             <select className="select" value={form.department_id} onChange={(event) => setForm((current) => ({ ...current, department_id: event.target.value }))} required>
@@ -263,9 +412,11 @@ function AdminStaffSection({ staff, onCreate, onDelete }) {
                             </select>
                         </Field>
                         <Field label="Rank">
-                            <select className="select" value={form.rank_id} onChange={(event) => setForm((current) => ({ ...current, rank_id: event.target.value }))} required>
+                            <select className="select" value={form.rank_id} onChange={(event) => setForm((current) => ({ ...current, rank_id: event.target.value }))} required disabled={!form.staff_category_id && staff.filters.categories?.length > 0}>
                                 <option value="">Select rank</option>
-                                {staff.filters.ranks.map((rank) => (
+                                {staff.filters.ranks
+                                    .filter(rank => !form.staff_category_id || String(rank.category_id) === String(form.staff_category_id))
+                                    .map((rank) => (
                                     <option key={rank.id} value={rank.id}>{rank.name}</option>
                                 ))}
                             </select>
@@ -286,6 +437,7 @@ function CollegeManager({ items, onSave, onDelete }) {
     const [showModal, setShowModal] = useState(false);
     const [name, setName] = useState('');
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSaving = isPending('save-college');
 
     useEffect(() => {
@@ -340,12 +492,14 @@ function CollegeManager({ items, onSave, onDelete }) {
                                             <button
                                                 type="button"
                                                 className="admin-icon-button is-danger"
-                                                onClick={() => {
-                                                    if (!window.confirm('Delete this college/faculty?')) {
-                                                        return;
-                                                    }
-
-                                                    void runPending(`delete-college-${item.id}`, () => onDelete(item.id));
+                                                onClick={async () => {
+                                                    await confirm({
+                                                        title: 'Confirm Deletion',
+                                                        message: 'Delete this college/faculty? All associated departments will be affected.',
+                                                        confirmText: 'Delete',
+                                                        danger: true,
+                                                        action: () => runPending(`delete-college-${item.id}`, () => onDelete(item.id))
+                                                    });
                                                 }}
                                                 disabled={isPending(`delete-college-${item.id}`)}
                                             >
@@ -387,6 +541,7 @@ function DepartmentManager({ items, colleges, onSave, onDelete }) {
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({ name: '', college_id: '' });
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSaving = isPending('save-department');
 
     useEffect(() => {
@@ -443,12 +598,14 @@ function DepartmentManager({ items, colleges, onSave, onDelete }) {
                                             <button
                                                 type="button"
                                                 className="admin-icon-button is-danger"
-                                                onClick={() => {
-                                                    if (!window.confirm('Delete this department?')) {
-                                                        return;
-                                                    }
-
-                                                    void runPending(`delete-department-${item.id}`, () => onDelete(item.id));
+                                                onClick={async () => {
+                                                    await confirm({
+                                                        title: 'Confirm Deletion',
+                                                        message: 'Delete this department? All associated records will be affected.',
+                                                        confirmText: 'Delete',
+                                                        danger: true,
+                                                        action: () => runPending(`delete-department-${item.id}`, () => onDelete(item.id))
+                                                    });
                                                 }}
                                                 disabled={isPending(`delete-department-${item.id}`)}
                                             >
@@ -498,6 +655,7 @@ function RankManager({ items, onSave, onDelete }) {
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({ rank_name: '', rank_level: 0 });
     const { isPending, runPending } = usePendingAction();
+    const confirm = useConfirm();
     const isSaving = isPending('save-rank');
 
     useEffect(() => {
@@ -554,12 +712,14 @@ function RankManager({ items, onSave, onDelete }) {
                                             <button
                                                 type="button"
                                                 className="admin-icon-button is-danger"
-                                                onClick={() => {
-                                                    if (!window.confirm('Delete this rank?')) {
-                                                        return;
-                                                    }
-
-                                                    void runPending(`delete-rank-${item.id}`, () => onDelete(item.id));
+                                                onClick={async () => {
+                                                    await confirm({
+                                                        title: 'Confirm Deletion',
+                                                        message: 'Delete this rank? Staff with this rank will need to be updated.',
+                                                        confirmText: 'Delete',
+                                                        danger: true,
+                                                        action: () => runPending(`delete-rank-${item.id}`, () => onDelete(item.id))
+                                                    });
                                                 }}
                                                 disabled={isPending(`delete-rank-${item.id}`)}
                                             >

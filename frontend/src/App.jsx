@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Flash } from './components/common/ui';
 import { ErrorState, LoadingScreen } from './components/common/states';
 import { AdminPortalPage } from './features/admin/AdminPortalPage';
+import { ExternalAdminPage } from './features/admin/ExternalAdminPage';
 import {
     ForcePasswordPage,
     ForgotPasswordPage,
@@ -97,6 +98,7 @@ export default function App() {
                         </ProtectedRoute>
                     )}
                 />
+                <Route path="/admin-logins/:system" element={<ExternalAdminPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </div>

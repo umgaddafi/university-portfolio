@@ -90,7 +90,12 @@ function AdminPortalPage({ user, onLogout, showFlash }) {
     if (section === 'dashboard') {
         content = <AdminDashboardSection dashboard={data.dashboard} />;
     } else if (section === 'staff') {
-        content = <AdminStaffSection staff={data.staff} onCreate={(payload) => mutate('/api/admin/staff', { method: 'POST', data: payload })} onDelete={(staffId) => mutate(`/api/admin/staff/${staffId}`, { method: 'DELETE' })} />;
+        content = <AdminStaffSection 
+            staff={data.staff} 
+            onCreate={(payload) => mutate('/api/admin/staff', { method: 'POST', data: payload })} 
+            onUpdate={(staffId, payload) => mutate(`/api/admin/staff/${staffId}`, { method: 'PUT', data: payload })} 
+            onDelete={(staffId) => mutate(`/api/admin/staff/${staffId}`, { method: 'DELETE' })} 
+        />;
     } else if (section === 'requests') {
         content = <AdminRequestsSection summary={data.requests} reloadPortal={load} showFlash={showFlash} />;
     } else if (section === 'verifications') {
