@@ -8314,6 +8314,10 @@
 }
 
 @media (max-width: 767px) {
+    html {
+        font-size: 13px;
+    }
+
     .directory-hero-stats {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 0.4rem;
@@ -8338,6 +8342,12 @@
     .directory-filter-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 0.4rem;
+    }
+
+    .directory-filter-grid .select {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.85rem;
+        text-overflow: ellipsis;
     }
 
     .directory-filter-sort {

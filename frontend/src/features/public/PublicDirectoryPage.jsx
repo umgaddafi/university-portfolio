@@ -84,7 +84,7 @@ function PublicDirectoryPage({ user }) {
                     <div className="directory-hero-copy">
                         <h2 className="directory-page-title">Academic Staff Directory</h2>
                         <p className="directory-hero-subtitle">
-                            Explore our professors, researchers, and academic leaders across faculties and departments.
+                            Explore our professors, researchers, and leaders across faculties and departments.
                         </p>
                         <div className="directory-hero-badges">
                             <span>Research</span>
