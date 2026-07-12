@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : 'https://jostumservices.com/api';
+const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : '/backend/public/jostum-api';
 
 export function ReprintRequestStep({ staffData }) {
     const [reason, setReason] = useState('lost');

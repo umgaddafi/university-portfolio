@@ -7,7 +7,7 @@ import { formatDateTime } from '../../utils/formatters';
 import { AdminRequestsWorkspace } from './AdminRequestsWorkspace';
 import { useConfirm } from '../../contexts/ConfirmContext';
 
-const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : 'https://jostumservices.com/api';
+const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : '/backend/public/jostum-api';
 
 function AdminDashboardSection({ dashboard }) {
     const today = new Date().toLocaleDateString(undefined, { month: 'long', day: '2-digit', year: 'numeric' });

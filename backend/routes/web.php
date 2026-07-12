@@ -13,6 +13,23 @@ Route::get('/', function () {
     ]);
 });
 
+Route::any('/jostum-api/{any}', function (\Illuminate\Http\Request $request, $any) {
+    $url = 'https://jostumservices.com/api/' . $any;
+    
+    // We only forward the request body and method.
+    // If we forward all headers, we might send an invalid Host or Origin header that breaks the target API.
+    $options = [];
+    if (in_array($request->method(), ['POST', 'PUT', 'PATCH'])) {
+        $options['body'] = $request->getContent();
+        $options['headers'] = ['Content-Type' => $request->header('Content-Type')];
+    }
+    
+    $response = \Illuminate\Support\Facades\Http::send($request->method(), $url, $options);
+
+    return response($response->body(), $response->status())
+        ->header('Content-Type', $response->header('Content-Type') ?? 'application/json');
+})->where('any', '.*');
+
 Route::prefix('api')->group(function (): void {
     Route::get('/bootstrap', [AuthController::class, 'bootstrap']);
 

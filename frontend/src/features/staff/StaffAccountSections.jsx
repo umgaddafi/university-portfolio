@@ -13,7 +13,7 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { useFaceDetector } from '../../utils/mediapipeFace';
 
-const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : 'https://jostumservices.com/api';
+const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : '/backend/public/jostum-api';
 
 function SettingsSection({ staff, user, notifications, onChangePassword, onMarkAllNotificationsRead, onDownloadCv }) {
     const [form, setForm] = useState({ new_password: '', new_password_confirmation: '' });
