@@ -303,7 +303,7 @@ export default function EvaluationForm() {
         {activeTabId === "drafting" && (
           <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-border pb-3">
-              <h3 className="text-lg md:text-xl font-semibold">Part A (Non-Teaching Staff)</h3>
+              <h3 className="text-lg md:text-xl font-bold text-emerald-900 flex items-center gap-2"><div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>Part A (Non-Teaching Staff)</h3>
               {role === 'staff' && urlState === 'drafting' && (
                 <div className="flex flex-wrap gap-2">
                   <button 
