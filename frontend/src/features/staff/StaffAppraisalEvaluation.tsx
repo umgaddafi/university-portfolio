@@ -245,13 +245,17 @@ export default function EvaluationForm() {
   return (
     <>
     <div className="max-w-5xl mx-auto space-y-4 md:space-y-8 print:hidden">
-      <div className="px-1">
-        <h1 className="text-xl md:text-3xl font-bold tracking-tight">Annual Performance Evaluation</h1>
-        <p className="text-muted-foreground mt-0.5 text-xs md:text-base">Status: <span className="font-semibold text-primary uppercase tracking-wider">{urlState.replace('_', ' ')}</span></p>
+      <div className="px-5 py-6 mb-4 rounded-2xl bg-gradient-to-br from-emerald-800 via-teal-700 to-emerald-600 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-teal-900 opacity-20 rounded-full blur-xl"></div>
+        <div className="relative z-10">
+          <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight drop-shadow-sm">Annual Performance Evaluation</h1>
+          <p className="text-emerald-50 mt-2 text-xs md:text-base font-medium flex items-center gap-2">Status: <span className="font-bold text-white uppercase tracking-wider bg-black/20 px-3 py-1 rounded-full shadow-inner">{urlState.replace('_', ' ')}</span></p>
+        </div>
       </div>
 
       {/* Stepper */}
-      <div className="bg-card border border-border p-3 md:p-5 rounded-xl shadow-sm overflow-x-auto scrollbar-hide">
+      <div className="bg-white border-0 ring-1 ring-slate-100 p-4 md:p-6 rounded-2xl shadow-md overflow-x-auto scrollbar-hide">
         <div className="flex items-center justify-between relative min-w-full md:min-w-[600px]">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted rounded-full"></div>
           
@@ -323,12 +327,12 @@ export default function EvaluationForm() {
               )}
             </div>
             
-            <div className="flex w-full border-b border-border mb-6">
+            <div className="flex w-full bg-slate-50/80 p-1.5 rounded-xl border border-slate-200/60 mb-6 gap-1.5 shadow-inner">
               {partAStages.map(st => (
                 <button 
                   type="button"
                   key={st.id}
-                  className={`flex-1 px-1 md:px-4 py-2 font-medium text-[10px] sm:text-xs md:text-sm text-center leading-tight border-b-2 transition-colors ${partAStage === st.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+                  className={`flex-1 px-1 md:px-4 py-2.5 font-bold text-[10px] sm:text-xs md:text-sm text-center leading-tight rounded-lg transition-all duration-300 ${partAStage === st.id ? 'bg-white shadow-md text-emerald-700 ring-1 ring-emerald-500/20 transform scale-[1.02]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
                   onClick={() => setPartAStage(st.id)}
                 >
                   {st.label}
@@ -337,8 +341,8 @@ export default function EvaluationForm() {
             </div>
             
             {partAStage === 1 && (
-            <div className="bg-muted/10 border border-border rounded-lg p-4 mb-6">
-              <h4 className="font-medium text-sm mb-3 text-primary">1. PERSONAL DATA</h4>
+            <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-xl p-5 mb-6 shadow-sm">
+              <h4 className="font-bold text-sm mb-4 text-emerald-800 flex items-center gap-2 border-b border-slate-100 pb-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> 1. PERSONAL DATA</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1"><label className="text-xs font-medium">Name</label><input type="text" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.name} onChange={e => setFormData({...formData, partA: {...formData.partA, name: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
                 <div className="space-y-1"><label className="text-xs font-medium">Date of Birth</label><input type="date" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.date_of_birth} onChange={e => setFormData({...formData, partA: {...formData.partA, date_of_birth: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
@@ -381,9 +385,9 @@ export default function EvaluationForm() {
                 { id: 'examinations', title: '16. Examinations taken (with results) during the period under review (state date).', btn: 'Examination', hasDates: true, stage: 4 },
                 { id: 'training', title: '17. Name any training course/workshop/seminar attended during the period under review (please attach appropriate evidence).', btn: 'Course/Workshop', hasDates: true, stage: 4 }
               ].filter((s: any) => s.stage === partAStage).map(section => (
-                <div key={section.id} className="bg-muted/10 border border-border rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-sm text-primary">{section.title}</h4>
+                <div key={section.id} className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-xl p-5 shadow-sm transition-all hover:shadow-md">
+                  <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                    <h4 className="font-bold text-sm text-emerald-800 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> {section.title}</h4>
                     {role === 'staff' && urlState === 'drafting' && section.id !== 'previous_employment' && (
                       <button onClick={() => handleAddField(section.id as any)} className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-1 rounded hover:bg-primary/20 uppercase tracking-wider transition-colors">+ Add</button>
                     )}
