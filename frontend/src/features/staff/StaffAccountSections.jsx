@@ -13,6 +13,8 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { useFaceDetector } from '../../utils/mediapipeFace';
 
+const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : 'https://jostumservices.com/api';
+
 function SettingsSection({ staff, user, notifications, onChangePassword, onMarkAllNotificationsRead, onDownloadCv }) {
     const [form, setForm] = useState({ new_password: '', new_password_confirmation: '' });
     const { isPending, runPending } = usePendingAction();
@@ -176,7 +178,7 @@ function IdCardSection({ staff, idCard, onRequestCard }) {
         let pfNumber = staff.staff_number;
         // The API route requires pfNumber, but it might contain a slash which might not be safely encoded in some routers.
         
-        fetch(`/jostum-api/v1/staff/${pfNumber}`)
+        fetch(`${JOSTUM_API}/v1/staff/${pfNumber}`)
             .then(res => {
                 if (!res.ok) throw new Error('API Request Failed');
                 return res.json();
@@ -237,7 +239,7 @@ function IdCardSection({ staff, idCard, onRequestCard }) {
                 return;
             }
 
-            const response = await fetch(`/jostum-api/v1/staff/${apiData.pf_number}`, {
+            const response = await fetch(`${JOSTUM_API}/v1/staff/${apiData.pf_number}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -278,7 +280,7 @@ function IdCardSection({ staff, idCard, onRequestCard }) {
                 return;
             }
 
-            const response = await fetch(`/jostum-api/v1/staff/${apiData.pf_number}`, {
+            const response = await fetch(`${JOSTUM_API}/v1/staff/${apiData.pf_number}`, {
                 method: 'POST',
                 body: formData,
             });

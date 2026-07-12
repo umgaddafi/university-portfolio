@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
+const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : 'https://jostumservices.com/api';
+
 export function ReprintRequestStep({ staffData }) {
     const [reason, setReason] = useState('lost');
     const [details, setDetails] = useState('');
@@ -10,7 +12,7 @@ export function ReprintRequestStep({ staffData }) {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        fetch('/jostum-api/v1/renewal-pricing')
+        fetch(`${JOSTUM_API}/v1/renewal-pricing`)
             .then(res => res.json())
             .then(data => {
                 if (data?.data?.staff_amount_naira) {
@@ -36,7 +38,7 @@ export function ReprintRequestStep({ staffData }) {
                 email: paymentEmail.trim()
             };
 
-            const response = await fetch(`/jostum-api/v1/staff/${staffData.pf_number}/card-renewal-payment/initialize`, {
+            const response = await fetch(`${JOSTUM_API}/v1/staff/${staffData.pf_number}/card-renewal-payment/initialize`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

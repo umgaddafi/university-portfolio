@@ -7,6 +7,8 @@ import { formatDateTime } from '../../utils/formatters';
 import { AdminRequestsWorkspace } from './AdminRequestsWorkspace';
 import { useConfirm } from '../../contexts/ConfirmContext';
 
+const JOSTUM_API = import.meta.env.DEV ? '/jostum-api' : 'https://jostumservices.com/api';
+
 function AdminDashboardSection({ dashboard }) {
     const today = new Date().toLocaleDateString(undefined, { month: 'long', day: '2-digit', year: 'numeric' });
     const statCards = [
@@ -162,7 +164,7 @@ function AdminStaffSection({ staff, onCreate, onUpdate, onDelete }) {
         setSearchSuccessful(false);
         
         try {
-            const response = await fetch(`/jostum-api/v1/staff/${form.staff_number}`);
+            const response = await fetch(`${JOSTUM_API}/v1/staff/${form.staff_number}`);
             
             if (!response.ok) {
                 throw new Error('Staff not found or API error.');
