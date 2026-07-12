@@ -34,6 +34,7 @@ echo ""
 echo "📝 Staging changes for git..."
 # Force add backend/.env in case it's in .gitignore
 git add -f backend/.env
+git add -f backend/vendor
 git add index.html assets/
 git add .
 
