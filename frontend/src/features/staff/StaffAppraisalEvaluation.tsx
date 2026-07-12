@@ -308,14 +308,14 @@ export default function EvaluationForm() {
                 <div className="flex flex-wrap gap-2">
                   <button 
                     type="button"
-                    className="text-xs border border-primary/20 text-primary px-3 py-1.5 rounded font-medium hover:bg-primary/10 transition-colors flex items-center gap-1"
+                    className="text-xs border border-emerald-200 bg-white shadow-sm text-emerald-700 px-4 py-2 rounded-lg font-bold hover:bg-emerald-50 hover:border-emerald-300 transition-all flex items-center gap-1.5"
                     onClick={() => window.print()}
                   >
-                    Preview
+                    <FileText size={14} /> Preview
                   </button>
                   <button 
                     type="button"
-                    className="text-xs bg-primary/10 text-primary px-3 py-1.5 rounded font-medium hover:bg-primary/20 transition-colors"
+                    className="text-xs bg-gradient-to-r from-emerald-100 to-teal-100 border border-emerald-200 shadow-sm text-emerald-800 px-4 py-2 rounded-lg font-bold hover:from-emerald-200 hover:to-teal-200 transition-all flex items-center gap-1.5"
                     onClick={() => {
                       alert("Fetched latest CV from profile.");
                       // TODO: Actual API fetch here. For now, it just shows intent.
@@ -344,31 +344,31 @@ export default function EvaluationForm() {
             <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-xl p-5 mb-6 shadow-sm">
               <h4 className="font-bold text-sm mb-4 text-emerald-800 flex items-center gap-2 border-b border-slate-100 pb-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> 1. PERSONAL DATA</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1"><label className="text-xs font-medium">Name</label><input type="text" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.name} onChange={e => setFormData({...formData, partA: {...formData.partA, name: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
-                <div className="space-y-1"><label className="text-xs font-medium">Date of Birth</label><input type="date" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.date_of_birth} onChange={e => setFormData({...formData, partA: {...formData.partA, date_of_birth: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
-                <div className="space-y-1"><label className="text-xs font-medium">Place of Birth</label><input type="text" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.place_of_birth} onChange={e => setFormData({...formData, partA: {...formData.partA, place_of_birth: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                <div className="space-y-1"><label className="text-xs font-medium">Name</label><input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.name} onChange={e => setFormData({...formData, partA: {...formData.partA, name: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                <div className="space-y-1"><label className="text-xs font-medium">Date of Birth</label><input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.date_of_birth} onChange={e => setFormData({...formData, partA: {...formData.partA, date_of_birth: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                <div className="space-y-1"><label className="text-xs font-medium">Place of Birth</label><input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.place_of_birth} onChange={e => setFormData({...formData, partA: {...formData.partA, place_of_birth: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium">Nationality</label>
-                  <select className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.nationality} onChange={e => setFormData({...formData, partA: {...formData.partA, nationality: e.target.value, state_of_origin: ''}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                  <select className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.nationality} onChange={e => setFormData({...formData, partA: {...formData.partA, nationality: e.target.value, state_of_origin: ''}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
                     <option value="">Select Country</option>
                     {countriesData.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium">State of Origin</label>
-                  <select className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.state_of_origin} onChange={e => setFormData({...formData, partA: {...formData.partA, state_of_origin: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting' || availableStates.length === 0}>
+                  <select className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.state_of_origin} onChange={e => setFormData({...formData, partA: {...formData.partA, state_of_origin: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting' || availableStates.length === 0}>
                     <option value="">Select State</option>
                     {availableStates.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
                   </select>
                 </div>
-                <div className="space-y-1"><label className="text-xs font-medium">Permanent Home Address</label><input type="text" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.permanent_address} onChange={e => setFormData({...formData, partA: {...formData.partA, permanent_address: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
-                <div className="space-y-1"><label className="text-xs font-medium">Correspondence Address</label><input type="text" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.correspondence_address} onChange={e => setFormData({...formData, partA: {...formData.partA, correspondence_address: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                <div className="space-y-1"><label className="text-xs font-medium">Permanent Home Address</label><input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.permanent_address} onChange={e => setFormData({...formData, partA: {...formData.partA, permanent_address: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                <div className="space-y-1"><label className="text-xs font-medium">Correspondence Address</label><input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.correspondence_address} onChange={e => setFormData({...formData, partA: {...formData.partA, correspondence_address: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
                 <div className="space-y-1"><label className="text-xs font-medium">Marital Status</label>
-                  <select className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.marital_status} onChange={e => setFormData({...formData, partA: {...formData.partA, marital_status: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                  <select className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.marital_status} onChange={e => setFormData({...formData, partA: {...formData.partA, marital_status: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
                     <option>Married</option><option>Single</option><option>Widowed</option><option>Divorced</option>
                   </select>
                 </div>
-                <div className="space-y-1"><label className="text-xs font-medium">Tel No(s)</label><input type="text" className="w-full px-2 py-1.5 text-sm border rounded bg-background" value={formData.partA.phone || ''} onChange={e => setFormData({...formData, partA: {...formData.partA, phone: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} placeholder="+234..." /></div>
+                <div className="space-y-1"><label className="text-xs font-medium">Tel No(s)</label><input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.phone || ''} onChange={e => setFormData({...formData, partA: {...formData.partA, phone: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} placeholder="+234..." /></div>
                 </div>
               </div>
             )}
@@ -398,30 +398,30 @@ export default function EvaluationForm() {
                         <span className="text-sm font-medium mt-1.5 w-4 text-right text-muted-foreground">{idx + 1}.</span>
                             <div className="flex-1 flex flex-col sm:flex-row gap-2 items-start w-full">
                               {(section as any).dropdownOptions && (
-                                <select className="px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none w-full sm:w-[120px]" value={item.subtype || ""} onChange={(e) => handleArrayChange(section.id as any, idx, 'subtype', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                                <select className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all w-full sm:w-[120px]" value={item.subtype || ""} onChange={(e) => handleArrayChange(section.id as any, idx, 'subtype', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'}>
                                   <option value="">Select...</option>
                                   {(section as any).dropdownOptions.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
                                 </select>
                               )}
                               {section.id === 'previous_employment' ? (
                                 <div className="w-full grid grid-cols-1 gap-2 mb-2">
-                                  <input type="text" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder="Employer" value={item.text || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'text', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
-                                  <input type="text" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder="Post Held" value={item.subtype || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'subtype', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
+                                  <input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="Employer" value={item.text || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'text', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
+                                  <input type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="Post Held" value={item.subtype || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'subtype', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
                                   <div className="flex flex-col sm:flex-row gap-2">
-                                    <input type="text" className="flex-1 px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder="Last Income p.a." value={item.income || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'income', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
-                                    <input type="text" className="flex-1 px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder="Reason for Leaving" value={item.reason || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'reason', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
+                                    <input type="text" className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="Last Income p.a." value={item.income || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'income', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
+                                    <input type="text" className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="Reason for Leaving" value={item.reason || ""} onChange={(e) => handleArrayChange('previous_employment', idx, 'reason', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
                                   </div>
                                 </div>
                               ) : (
-                                <textarea rows={section.hasDates ? 3 : 2} className="w-full flex-1 px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-y" placeholder={(section as any).dropdownOptions ? `Enter course/details...` : `Enter ${section.btn.toLowerCase()} details...`} value={item.text} onChange={(e) => handleArrayChange(section.id as any, idx, 'text', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
+                                <textarea rows={section.hasDates ? 3 : 2} className="w-full flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-y" placeholder={(section as any).dropdownOptions ? `Enter course/details...` : `Enter ${section.btn.toLowerCase()} details...`} value={item.text} onChange={(e) => handleArrayChange(section.id as any, idx, 'text', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'} />
                               )}
                               {section.hasDates && (
                                 <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
-                                  <select className="flex-1 sm:flex-none px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none sm:w-[90px]" value={item.start} onChange={(e) => handleArrayChange(section.id as any, idx, 'start', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                                  <select className="flex-1 sm:flex-none px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all sm:w-[90px]" value={item.start} onChange={(e) => handleArrayChange(section.id as any, idx, 'start', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'}>
                                     <option value="">Start</option>
                                     {years.map(y => <option key={y} value={y}>{y}</option>)}
                                   </select>
-                                  <select className="flex-1 sm:flex-none px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none sm:w-[90px]" value={item.end} onChange={(e) => handleArrayChange(section.id as any, idx, 'end', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                                  <select className="flex-1 sm:flex-none px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all sm:w-[90px]" value={item.end} onChange={(e) => handleArrayChange(section.id as any, idx, 'end', e.target.value)} disabled={role !== 'staff' || urlState !== 'drafting'}>
                                     <option value="">End</option>
                                     <option value="Present">Present</option>
                                     {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -445,22 +445,22 @@ export default function EvaluationForm() {
                   <div className="bg-muted/10 border border-border rounded-lg p-4 mt-6">
                     <h4 className="font-medium text-sm mb-3 text-primary uppercase">JOSTUM APPOINTMENT HISTORY</h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1"><label className="text-xs font-medium">7(a) Date of First Appointment</label><input type="date" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.date_of_first_appointment} onChange={e => setFormData({...formData, partA: {...formData.partA, date_of_first_appointment: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
-                      <div className="space-y-1"><label className="text-xs font-medium">7(b) Date of Transfer of Service to JOSTUM</label><input type="date" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.date_of_transfer} onChange={e => setFormData({...formData, partA: {...formData.partA, date_of_transfer: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
-                      <div className="space-y-1"><label className="text-xs font-medium">7(c) Date of Assumption of Duty in JOSTUM</label><input type="date" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.date_assumed_duty} onChange={e => setFormData({...formData, partA: {...formData.partA, date_assumed_duty: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                      <div className="space-y-1"><label className="text-xs font-medium">7(a) Date of First Appointment</label><input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.date_of_first_appointment} onChange={e => setFormData({...formData, partA: {...formData.partA, date_of_first_appointment: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                      <div className="space-y-1"><label className="text-xs font-medium">7(b) Date of Transfer of Service to JOSTUM</label><input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.date_of_transfer} onChange={e => setFormData({...formData, partA: {...formData.partA, date_of_transfer: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                      <div className="space-y-1"><label className="text-xs font-medium">7(c) Date of Assumption of Duty in JOSTUM</label><input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.date_assumed_duty} onChange={e => setFormData({...formData, partA: {...formData.partA, date_assumed_duty: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">8. Rank on First Appointment in JOSTUM</label>
-                        <select className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.rank_on_first_appointment} onChange={e => setFormData({...formData, partA: {...formData.partA, rank_on_first_appointment: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                        <select className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.rank_on_first_appointment} onChange={e => setFormData({...formData, partA: {...formData.partA, rank_on_first_appointment: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
                           <option value="">Select Rank</option>
                           {dbRanks.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
                           {dbRanks.length === 0 && <option value="Assistant Lecturer">Assistant Lecturer</option>}
                         </select>
                       </div>
-                      <div className="space-y-1"><label className="text-xs font-medium">9. Date of Confirmation of Appointment</label><input type="date" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.date_confirmed} onChange={e => setFormData({...formData, partA: {...formData.partA, date_confirmed: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
-                      <div className="space-y-1"><label className="text-xs font-medium">10. Date of Last Promotion/Regrading/Conversion</label><input type="date" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.date_last_promoted} onChange={e => setFormData({...formData, partA: {...formData.partA, date_last_promoted: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                      <div className="space-y-1"><label className="text-xs font-medium">9. Date of Confirmation of Appointment</label><input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.date_confirmed} onChange={e => setFormData({...formData, partA: {...formData.partA, date_confirmed: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
+                      <div className="space-y-1"><label className="text-xs font-medium">10. Date of Last Promotion/Regrading/Conversion</label><input type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.date_last_promoted} onChange={e => setFormData({...formData, partA: {...formData.partA, date_last_promoted: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'} /></div>
                       <div className="space-y-1 md:col-span-1">
                         <label className="text-xs font-medium">11. Present Rank</label>
-                        <select className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.present_rank} onChange={e => setFormData({...formData, partA: {...formData.partA, present_rank: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                        <select className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.present_rank} onChange={e => setFormData({...formData, partA: {...formData.partA, present_rank: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
                           <option value="">Select Rank</option>
                           {dbRanks.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
                           {dbRanks.length === 0 && <option value="Senior Lecturer">Senior Lecturer</option>}
@@ -469,11 +469,11 @@ export default function EvaluationForm() {
                       <div className="space-y-1 md:col-span-2">
                         <label className="text-xs font-medium">12. Present Salary/CONTISS (Level & Step)</label>
                         <div className="flex gap-2 md:w-2/3">
-                          <select className="w-1/2 px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.present_level} onChange={e => setFormData({...formData, partA: {...formData.partA, present_level: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                          <select className="w-1/2 px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.present_level} onChange={e => setFormData({...formData, partA: {...formData.partA, present_level: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
                             <option value="">CONTISS Level</option>
                             {Array.from({length: 18}, (_, i) => i + 1).map(l => <option key={l} value={l}>CONTISS {l}</option>)}
                           </select>
-                          <select className="w-1/2 px-2 py-1.5 text-sm border border-border rounded bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none" value={formData.partA.present_step} onChange={e => setFormData({...formData, partA: {...formData.partA, present_step: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
+                          <select className="w-1/2 px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" value={formData.partA.present_step} onChange={e => setFormData({...formData, partA: {...formData.partA, present_step: e.target.value}})} disabled={role !== 'staff' || urlState !== 'drafting'}>
                             <option value="">Step</option>
                             {Array.from({length: 15}, (_, i) => i + 1).map(s => <option key={s} value={s}>Step {s}</option>)}
                           </select>
@@ -547,7 +547,7 @@ export default function EvaluationForm() {
                 <button 
                   type="button"
                   onClick={() => setPartAStage(s => s - 1)}
-                  className="px-4 py-2 bg-muted text-muted-foreground rounded-md font-medium hover:bg-muted/80 transition-colors whitespace-nowrap"
+                  className="px-6 py-2.5 bg-white border border-slate-300 shadow-sm text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all whitespace-nowrap"
                 >
                   Back
                 </button>
@@ -557,7 +557,7 @@ export default function EvaluationForm() {
                 <button 
                   type="button"
                   onClick={() => setPartAStage(s => s + 1)}
-                  className="px-6 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+                  className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 shadow-md text-white rounded-xl font-bold hover:from-emerald-700 hover:to-teal-600 hover:shadow-lg transition-all whitespace-nowrap"
                 >
                   Next
                 </button>
@@ -567,18 +567,18 @@ export default function EvaluationForm() {
                     <Check className="w-4 h-4 flex-none"/>
                   </div>
                   {role === 'staff' && urlState === 'drafting' ? (
-                    <button 
-                      onClick={() => handleAction("A", "Part A Submitted successfully!")}
-                      disabled={isSubmitting || !isPartAValid()}
-                      className="px-6 py-2 bg-emerald-600 text-white rounded-md font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {isSubmitting ? "Submitting..." : <><Check className="w-4 h-4"/> Submit Part A</>}
-                    </button>
-                  ) : activeTabId !== activeStepToJumpTo ? (
-                    <button 
-                      onClick={() => setActiveTabId(activeStepToJumpTo)}
-                      className="px-6 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
-                    >
+                      <button 
+                        onClick={() => handleAction("A", "Part A Submitted successfully!")}
+                        disabled={isSubmitting || !isPartAValid()}
+                        className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-md text-white rounded-xl font-bold hover:from-emerald-700 hover:to-emerald-600 hover:shadow-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center gap-2"
+                      >
+                        {isSubmitting ? "Submitting..." : <><Check className="w-5 h-5"/> Submit Part A</>}
+                      </button>
+                    ) : activeTabId !== activeStepToJumpTo ? (
+                      <button 
+                        onClick={() => setActiveTabId(activeStepToJumpTo)}
+                        className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 shadow-md text-white rounded-xl font-bold hover:from-emerald-700 hover:to-teal-600 hover:shadow-lg transition-all flex items-center gap-2"
+                      >
                       Continue to Active Step
                     </button>
                   ) : null}
