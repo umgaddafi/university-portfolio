@@ -109,16 +109,7 @@ function LoginPage({ user, onLogin }) {
                         <Link className="link-button" to="/">Back to public directory</Link>
                     </div>
 
-                    <div className="login-links" style={{ marginTop: '1.5rem', borderTop: '1px solid var(--line)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                        <p style={{ width: '100%', fontSize: '0.85rem', color: 'var(--muted)', textAlign: 'center', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Other Admin Portals</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', width: '100%' }}>
-                            <Link className="link-button" style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'var(--gray)', borderRadius: '6px', fontSize: '0.875rem' }} to="/admin-logins/audit-admin">Audit Admin</Link>
-                            <Link className="link-button" style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'var(--gray)', borderRadius: '6px', fontSize: '0.875rem' }} to="/admin-logins/appraisal-admin">Appraisal Admin (HR)</Link>
-                            <Link className="link-button" style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'var(--gray)', borderRadius: '6px', fontSize: '0.875rem' }} to="/admin-logins/appraisal-supervisor">Appraisal Supervisor</Link>
-                            <Link className="link-button" style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'var(--gray)', borderRadius: '6px', fontSize: '0.875rem' }} to="/admin-logins/appraisal-dept-chairman">Appraisal Dept Chair</Link>
-                            <Link className="link-button" style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: 'var(--gray)', borderRadius: '6px', fontSize: '0.875rem', gridColumn: 'span 2' }} to="/admin-logins/appraisal-apc">Appraisal A&amp;P Chair</Link>
-                        </div>
-                    </div>
+
                 </form>
             </main>
         </div>
