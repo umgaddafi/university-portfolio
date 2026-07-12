@@ -8,8 +8,7 @@ import DocumentModal from './audit-components/DocumentModal';
 import LoadingButton from './audit-components/LoadingButton';
 import StatCard from './audit-components/StatCard';
 import '../../styles/app.css';
-
-const PUBLIC_BASE_URL = 'http://localhost/audit-system/backend/public';
+const PUBLIC_BASE_URL = import.meta.env.VITE_AUDIT_API_URL || 'http://localhost/audit-system/backend/public';
 
 const api = axios.create({
   baseURL: `${PUBLIC_BASE_URL}/api`,
