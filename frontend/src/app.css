@@ -4438,12 +4438,11 @@
 .admin-portal-shell .portal-nav a {
     grid-template-columns: 1.15rem minmax(0, 1fr);
     gap: 0.85rem;
-    min-height: auto;
-    margin: 0.2rem 0;
-    padding: 0.85rem 1.5rem;
+    min-height: 2.8rem;
+    margin: 0.2rem 1rem 0.2rem 0;
+    padding: 0.78rem 1.25rem;
     border: 0;
-    border-left: 4px solid transparent;
-    border-radius: 0;
+    border-radius: 0 999px 999px 0;
     background: transparent;
     box-shadow: none;
     color: rgba(255, 255, 255, 0.7);
@@ -4471,15 +4470,16 @@
     transform: none;
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
-    padding-left: 1.75rem;
+    box-shadow: none;
+    padding-left: 1.45rem;
 }
 
 .admin-portal-shell .portal-nav a.active {
     transform: none;
-    border-left-color: var(--admin-shell-gold);
-    background: rgba(200, 163, 107, 0.18);
-    color: #ffffff;
+    background: var(--admin-shell-gold);
+    color: #111827;
     font-weight: 600;
+    box-shadow: none;
 }
 
 .admin-portal-shell .portal-nav a.active .portal-nav-icon,
